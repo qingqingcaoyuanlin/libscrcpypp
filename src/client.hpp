@@ -74,6 +74,11 @@ namespace scc {
                         }
                     }
                     std::cout << "frame received with size" << frame_buffer.size() << std::endl;
+
+                    this->data_queue.emplace(std::move(frame_buffer));
+                    if (this->data_queue.size() > 3) {
+                        this->data_queue.pop();
+                    }
                 }
             });
             t.detach();

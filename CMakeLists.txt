@@ -1,16 +1,16 @@
 cmake_minimum_required(VERSION 3.30)
-project(scrcpy-cpp-client)
+project(scrcpy++)
 
 set(CMAKE_CXX_STANDARD 26)
 
 find_package(Boost 1.8.0 REQUIRED)
 
-add_library(scrcpy-cpp-client STATIC src/client.hpp)
-target_include_directories(scrcpy-cpp-client PUBLIC src)
-set_target_properties(scrcpy-cpp-client PROPERTIES LINKER_LANGUAGE CXX)
-target_link_libraries(scrcpy-cpp-client PUBLIC ${Boost_LIBRARIES})
+add_library(scrcpy++ STATIC src/client.hpp)
+target_include_directories(scrcpy++ PUBLIC src)
+set_target_properties(scrcpy++ PROPERTIES LINKER_LANGUAGE CXX)
+target_link_libraries(scrcpy++ PUBLIC ${Boost_LIBRARIES})
 
-add_executable(scrcpy-cpp-client-test)
-target_include_directories(scrcpy-cpp-client-test PUBLIC src)
-target_sources(scrcpy-cpp-client-test PRIVATE src/test.cpp)
-target_link_libraries(scrcpy-cpp-client)
+add_executable(scrcpy++-test)
+target_include_directories(scrcpy++-test PUBLIC src)
+target_sources(scrcpy++-test PRIVATE src/test.cpp)
+target_link_libraries(scrcpy++)

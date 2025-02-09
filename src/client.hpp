@@ -96,8 +96,8 @@ namespace scc {
 
         auto deploy(const std::filesystem::path &adb_bin,
                     const std::filesystem::path &scrcpy_jar_bin,
-                    const std::string &scrcpy_server_version = "3.1",
-                    const std::uint16_t port = 1234,
+                    const std::string &scrcpy_server_version,
+                    const std::uint16_t port,
                     const std::optional<std::string> &device_serial) {
             //adb shell CLASSPATH=/sdcard/scrcpy-server.jar app_process / com.genymobile.scrcpy.Server 3.1 tunnel_forward=true cleanup=false audio=false control=false max_size=1920
             using namespace boost::process;

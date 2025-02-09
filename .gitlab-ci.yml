@@ -12,3 +12,5 @@ build-linux-job:
     name: libscrcpy++-${CI_PIPELINE_ID}
     paths:
       - build/libscrcpy++.a
+  tags:
+    - docker

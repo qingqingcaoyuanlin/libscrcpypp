@@ -1,0 +1,14 @@
+stages:
+  - build
+
+build-linux-job:
+  image: enderthecoder/libscrcpypp
+  script:
+    - mkdir build
+    - cd build
+    - cmake ..
+    - make -j
+  artifacts:
+    name: libscrcpy++-${CI_PIPELINE_ID}
+    paths:
+      - build/libscrcpy++.a

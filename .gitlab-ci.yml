@@ -2,6 +2,7 @@ stages:
   - build
 
 build-linux-job:
+  stage: build
   image: enderthecoder/libscrcpypp
   script:
     - mkdir build

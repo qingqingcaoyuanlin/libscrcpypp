@@ -9,6 +9,7 @@
 #include <iostream>
 #include <utility>
 #include <queue>
+#include <filesystem>
 #include <boost/asio.hpp>
 #include <boost/process.hpp>
 
@@ -74,10 +75,10 @@ namespace scc {
                         }
                     }
                     std::cout << "frame received with size" << frame_buffer.size() << std::endl;
-
-                    this->data_queue.emplace(std::move(frame_buffer));
-                    if (this->data_queue.size() > 3) {
-                        this->data_queue.pop();
+                    std::lock_guard guard(frame_mutex);
+                    this->frame_queue.emplace(std::move(frame_buffer));
+                    if (this->frame_queue.size() > 3) {
+                        this->frame_queue.pop();
                     }
                 }
             });
@@ -88,8 +89,44 @@ namespace scc {
             this->recv_enabled = false;
         }
 
-        static auto start_scrcpy_server() {
+        auto frame() {
+            std::lock_guard guard(frame_mutex);
+            return this->frame_queue.front();
+        }
+
+        auto deploy(const std::filesystem::path &adb_bin,
+                    const std::filesystem::path &scrcpy_jar_bin,
+                    const std::string &scrcpy_server_version = "3.1",
+                    const std::uint16_t port = 1234,
+                    const std::optional<std::string> &device_serial) {
             //adb shell CLASSPATH=/sdcard/scrcpy-server.jar app_process / com.genymobile.scrcpy.Server 3.1 tunnel_forward=true cleanup=false audio=false control=false max_size=1920
+            using namespace boost::process;
+            ipstream out_stream;
+            auto adb_exec = adb_bin.string();
+            if (device_serial.has_value()) {
+                adb_exec += " -s " + device_serial.value();
+            }
+            auto upload_cmd = std::format("{} push {} /sdcard/", adb_exec, scrcpy_jar_bin);
+            auto forward_cmd = std::format("{} forward tcp:{} localabstract:scrcpy", adb_exec, port);
+            auto exec_cmd = std::format(
+                "{} shell CLASSPATH=/sdcard/scrcpy-server.jar app_process / com.genymobile.scrcpy.Server"
+                " {} tunnel_forward=true cleanup=false audio=false control=false max_size=1920",
+                adb_exec, scrcpy_server_version
+            );
+
+            child upload_c(upload_cmd, std_out > out_stream);
+            upload_c.wait();
+            if (upload_c.exit_code() != 0) {
+                throw std::runtime_error("error uploading scrcpy server jar");
+            }
+
+            child forward_c(forward_c, std_out > out_stream);
+            forward_c.wait();
+            if (forward_c.exit_code() != 0) {
+                throw std::runtime_error("error forwarding scrcpy to local tcp port");
+            }
+
+            server_c = child{exec_cmd, std_out > out_stream};
         }
 
     private:
@@ -101,11 +138,14 @@ namespace scc {
         std::uint32_t height{0};
         std::uint32_t width{0};
 
+        boost::process::child server_c;
+
         std::atomic<bool> recv_enabled{false};
 
         std::shared_ptr<boost::asio::ip::tcp::socket> video_socket;
 
-        std::queue<std::vector<std::byte> > data_queue;
+        std::mutex frame_mutex;
+        std::queue<std::vector<std::byte> > frame_queue;
     };
 }
 #endif //CLIENT_HPP

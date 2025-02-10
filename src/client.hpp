@@ -98,7 +98,7 @@ namespace scc {
                     const std::filesystem::path &scrcpy_jar_bin,
                     const std::string &scrcpy_server_version,
                     const std::uint16_t port,
-                    const std::optional<std::string> &device_serial) {
+                    const std::optional<std::string> &device_serial = std::nullopt) {
             //adb shell CLASSPATH=/sdcard/scrcpy-server.jar app_process / com.genymobile.scrcpy.Server 3.1 tunnel_forward=true cleanup=false audio=false control=false max_size=1920
             using namespace boost::process;
             ipstream out_stream;
@@ -120,7 +120,7 @@ namespace scc {
                 throw std::runtime_error("error uploading scrcpy server jar");
             }
 
-            child forward_c(forward_c, std_out > out_stream);
+            child forward_c(forward_cmd, std_out > out_stream);
             forward_c.wait();
             if (forward_c.exit_code() != 0) {
                 throw std::runtime_error("error forwarding scrcpy to local tcp port");

@@ -106,7 +106,7 @@ namespace scc {
             if (device_serial.has_value()) {
                 adb_exec += " -s " + device_serial.value();
             }
-            auto upload_cmd = std::format("{} push {} /sdcard/", adb_exec, scrcpy_jar_bin);
+            auto upload_cmd = std::format("{} push {} /sdcard/", adb_exec, scrcpy_jar_bin.string());
             auto forward_cmd = std::format("{} forward tcp:{} localabstract:scrcpy", adb_exec, port);
             auto exec_cmd = std::format(
                 "{} shell CLASSPATH=/sdcard/scrcpy-server.jar app_process / com.genymobile.scrcpy.Server"

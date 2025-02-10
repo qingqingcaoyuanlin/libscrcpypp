@@ -19,6 +19,10 @@ namespace scc {
         client(std::string addr, const std::uint16_t port) : addr(std::move(addr)), port(port) {
         }
 
+        ~client() {
+            server_c.terminate();
+        }
+
         auto connect() {
             using boost::asio::ip::tcp;
             boost::asio::io_context io_context;

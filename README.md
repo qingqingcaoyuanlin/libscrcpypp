@@ -16,7 +16,7 @@ and high-quality.
 
 - Prepare an adb binary.
 - Prepare a scrcpy-server jar and get its exact version.
-
+- Make sure that your android devices are already connected to your host.
 ## example
 
 ```c++

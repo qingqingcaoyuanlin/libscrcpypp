@@ -154,7 +154,7 @@ namespace scc {
             auto forward_cmd = std::format("{} forward tcp:{} localabstract:scrcpy", adb_exec, port);
             auto exec_cmd = std::format(
                 "{} shell CLASSPATH=/sdcard/scrcpy-server.jar app_process / com.genymobile.scrcpy.Server"
-                " {} tunnel_forward=true cleanup=false audio=false control=false",
+                " {} tunnel_forward=true cleanup=true audio=false control=false",
                 adb_exec, scrcpy_server_version
             );
 

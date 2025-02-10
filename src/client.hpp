@@ -52,7 +52,7 @@ namespace scc {
             std::cout << "device name: " << device_name << std::endl;
             std::array<std::byte, 12> codec_meta_buffer = {};
             this->video_socket->read_some(boost::asio::buffer(codec_meta_buffer));
-            this->codec_id = std::string{reinterpret_cast<char *>(codec_meta_buffer.data()), 4};
+            this->codec = std::string{reinterpret_cast<char *>(codec_meta_buffer.data()), 4};
             std::reverse(codec_meta_buffer.begin() + 4, codec_meta_buffer.begin() + 8);
             std::reverse(codec_meta_buffer.begin() + 8, codec_meta_buffer.end());
             this->width = *reinterpret_cast<std::uint32_t *>(codec_meta_buffer.data() + 4);
@@ -99,6 +99,10 @@ namespace scc {
             return this->frame_queue.front();
         }
 
+        std::tuple<std::uint64_t, std::uint64_t> get_w_size() {
+            return {width, height};
+        }
+
         static auto read_forward(const std::filesystem::path &adb_bin) {
             using namespace boost::process;
             ipstream out_stream;
@@ -124,6 +128,10 @@ namespace scc {
                 }
             }
             return std::nullopt;
+        }
+
+        auto get_codec() {
+            return this->codec;
         }
 
         auto deploy(const std::filesystem::path &adb_bin,
@@ -189,7 +197,7 @@ namespace scc {
         std::uint16_t port;
 
         std::string device_name{};
-        std::string codec_id{};
+        std::string codec{};
         std::uint32_t height{0};
         std::uint32_t width{0};
 

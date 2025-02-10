@@ -10,6 +10,7 @@
 #include <utility>
 #include <queue>
 #include <filesystem>
+#include <ranges>
 #include <boost/asio.hpp>
 #include <boost/process.hpp>
 
@@ -98,6 +99,33 @@ namespace scc {
             return this->frame_queue.front();
         }
 
+        static auto read_forward(const std::filesystem::path &adb_bin) {
+            using namespace boost::process;
+            ipstream out_stream;
+            using std::operator""sv;
+            child list_c(std::format("{} forward --list", adb_bin.string()), std_out > out_stream);
+            std::vector<std::array<std::string, 3> > forward_list;
+            for (std::string line; out_stream && std::getline(out_stream, line) && !line.empty();) {
+                std::cout << "line: " << line << std::endl;
+                auto item = std::array<std::string, 3>{};
+                for (const auto [idx, part]: std::views::split(line, " "sv) | std::views::enumerate) {
+                    item.at(idx) = std::string_view(part);
+                }
+                forward_list.emplace_back(item);
+            }
+            return forward_list;
+        }
+
+        static std::optional<std::string> forward_list_contains_tcp_port(
+            const std::filesystem::path &adb_bin, const std::uint16_t port) {
+            for (const auto [serial, local, remote]: read_forward(adb_bin)) {
+                if (local.contains(std::format("tcp:{}", port))) {
+                    return serial;
+                }
+            }
+            return std::nullopt;
+        }
+
         auto deploy(const std::filesystem::path &adb_bin,
                     const std::filesystem::path &scrcpy_jar_bin,
                     const std::string &scrcpy_server_version,
@@ -107,10 +135,22 @@ namespace scc {
             using namespace boost::process;
             ipstream out_stream;
             auto adb_exec = adb_bin.string();
+            std::string serial;
             if (device_serial.has_value()) {
                 adb_exec += " -s " + device_serial.value();
+                serial = device_serial.value();
+            } else {
+                auto serial_c = child(std::format("{} get-serialno", adb_exec), std_out > out_stream);
+                serial_c.wait();
+                if (serial_c.exit_code() != 0) {
+                    throw std::runtime_error("failed to get adb device serialno");
+                }
+                for (std::string line; out_stream && std::getline(out_stream, line) && !line.empty();) {
+                    serial = line;
+                    break; // read first line only
+                }
             }
-            auto upload_cmd = std::format("{} push {} /sdcard/", adb_exec, scrcpy_jar_bin.string());
+            auto upload_cmd = std::format("{} push {} /sdcard/scrcpy-server.jar", adb_exec, scrcpy_jar_bin.string());
             auto forward_cmd = std::format("{} forward tcp:{} localabstract:scrcpy", adb_exec, port);
             auto exec_cmd = std::format(
                 "{} shell CLASSPATH=/sdcard/scrcpy-server.jar app_process / com.genymobile.scrcpy.Server"
@@ -118,19 +158,30 @@ namespace scc {
                 adb_exec, scrcpy_server_version
             );
 
-            child upload_c(upload_cmd, std_out > out_stream);
+            child upload_c(upload_cmd);
             upload_c.wait();
             if (upload_c.exit_code() != 0) {
                 throw std::runtime_error("error uploading scrcpy server jar");
             }
 
-            child forward_c(forward_cmd, std_out > out_stream);
-            forward_c.wait();
-            if (forward_c.exit_code() != 0) {
-                throw std::runtime_error("error forwarding scrcpy to local tcp port");
+            if (const auto existing_serial = forward_list_contains_tcp_port(adb_bin, port);
+                existing_serial.has_value()) {
+                if (existing_serial.value() != serial) {
+                    throw std::runtime_error(
+                        std::format(
+                            "another adb device[serial={}] is forwarding on this port[{}]",
+                            existing_serial.value(), port)
+                    );
+                }
+            } else {
+                child forward_c(forward_cmd, std_out > out_stream);
+                forward_c.wait();
+                if (forward_c.exit_code() != 0) {
+                    throw std::runtime_error("error forwarding scrcpy to local tcp port");
+                }
             }
 
-            server_c = child{exec_cmd, std_out > out_stream};
+            server_c = child{exec_cmd};
         }
 
     private:

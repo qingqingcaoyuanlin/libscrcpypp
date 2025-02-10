@@ -8,6 +8,8 @@ int main(int argc, char *argv[]) {
     cli.start_recv();
     auto frame = cli.frame();
     // do the codec stuff
+    auto codec = cli.get_codec();
+    auto [w, h] = cli.get_w_size();
     std::this_thread::sleep_for(std::chrono::seconds(10));
 
     return 0;

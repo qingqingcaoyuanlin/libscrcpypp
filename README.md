@@ -12,6 +12,11 @@ and [Boost.Asio](https://www.boost.org/doc/libs/1_87_0/doc/html/boost_asio.html)
 from android devices with low-latency
 and high-quality.
 
+## before use
+
+- Prepare an adb binary.
+- Prepare a scrcpy-server jar and get its exact version.
+
 ## example
 
 ```c++
@@ -41,7 +46,9 @@ int main(int argc, char *argv[]) {
 
 ## docker
 
-providing public docker env for building and testing: [enderthecoder/libscrcpypp](https://hub.docker.com/repository/docker/enderthecoder/libscrcpypp)
+providing public docker env for building and
+testing: [enderthecoder/libscrcpypp](https://hub.docker.com/repository/docker/enderthecoder/libscrcpypp)
+
 ```shell
 docker pull enderthecoder/libscrcpypp:latest
 ```

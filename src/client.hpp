@@ -109,6 +109,7 @@ namespace scc {
             using std::operator""sv;
             child list_c(std::format("{} forward --list", adb_bin.string()), std_out > out_stream);
             std::vector<std::array<std::string, 3> > forward_list;
+            list_c.wait();
             for (std::string line; out_stream && std::getline(out_stream, line) && !line.empty();) {
                 std::cout << "line: " << line << std::endl;
                 auto item = std::array<std::string, 3>{};
@@ -122,12 +123,34 @@ namespace scc {
 
         static std::optional<std::string> forward_list_contains_tcp_port(
             const std::filesystem::path &adb_bin, const std::uint16_t port) {
-            for (const auto [serial, local, remote]: read_forward(adb_bin)) {
+            for (const auto &[serial, local, remote]: read_forward(adb_bin)) {
                 if (local.contains(std::format("tcp:{}", port))) {
                     return serial;
                 }
             }
             return std::nullopt;
+        }
+
+        static auto list_dev_serials(const std::filesystem::path &adb_bin) {
+            using namespace boost::process;
+            ipstream out_stream;
+            using std::operator""sv;
+            child list_c(std::format("{} devices", adb_bin.string()), std_out > out_stream);
+            auto sig_start = false;
+            std::vector<std::string> serials;
+            list_c.wait();
+            for (std::string line; out_stream && std::getline(out_stream, line) && !line.empty();) {
+                if (sig_start) {
+                    for (const auto [s_begin, s_end]: std::views::split(line, "\t"sv)) {
+                        auto serial = std::string_view(s_begin, s_end);
+                        serials.emplace_back(serial);
+                        break;
+                    }
+                } else if (line == "List of devices attached") {
+                    sig_start = true;
+                }
+            }
+            return serials;
         }
 
         auto get_codec() {

@@ -14,3 +14,8 @@ add_executable(scrcpy++-test)
 target_include_directories(scrcpy++-test PUBLIC src)
 target_sources(scrcpy++-test PRIVATE src/test.cpp)
 target_link_libraries(scrcpy++)
+
+install(TARGETS scrcpy++
+        PUBLIC_HEADER
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/src
+)

@@ -14,7 +14,7 @@ target_include_directories(scrcpy++ PUBLIC
         PUBLIC ${BOOST_INCLUDE}
 )
 set_target_properties(scrcpy++ PROPERTIES LINKER_LANGUAGE CXX)
-target_link_libraries(scrcpy++ INTERFACE ${Boost_LIBRARIES})
+target_link_libraries(scrcpy++ PUBLIC ${Boost_LIBRARIES})
 
 add_executable(scrcpy++-test)
 target_include_directories(scrcpy++-test PUBLIC src)

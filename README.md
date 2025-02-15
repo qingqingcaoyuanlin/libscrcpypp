@@ -17,6 +17,7 @@ and high-quality.
 - Prepare an adb binary.
 - Prepare a scrcpy-server jar and get its exact version.
 - Make sure that your android devices are already connected to your host.
+
 ## example
 
 ```c++
@@ -54,7 +55,10 @@ docker pull enderthecoder/libscrcpypp:latest
 ```
 
 ## build && install
-Use following commands to build and install this lib on your machine. Notice that install lib might require sudo permission.
+
+Use following commands to build and install this lib on your machine. Notice that install lib might require sudo
+permission.
+
 ```shell
 git clone https://github.com/EnderTheCoder/libscrcpypp
 cd libscrcpypp
@@ -64,3 +68,11 @@ cmake ..
 cmake --build .
 cmake --install .
 ```
+
+## download official windows && linux build
+
+Click the following link and pick up an artifact:
+
+[gitlab build site](https://git.ender.cool/EnderTheCoder/libscrcpypp/-/artifacts)
+
+Official CI build for macOS is currently unavailable(I don't have a mac myself).

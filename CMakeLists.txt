@@ -3,7 +3,7 @@ project(scrcpy++ VERSION 1.1.1)
 
 set(CMAKE_CXX_STANDARD 23)
 
-find_package(Boost 1.8.0 REQUIRED ALL)
+find_package(Boost 1.80.0 COMPONENTS ALL)
 
 include_directories(${Boost_INCLUDE_DIRS})
 

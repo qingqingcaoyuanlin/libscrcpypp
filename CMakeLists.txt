@@ -7,14 +7,14 @@ find_package(Boost 1.8.0 REQUIRED)
 
 include_directories(${Boost_INCLUDE_DIRS})
 
-add_library(scrcpy++ STATIC src/client.hpp)
+add_library(scrcpy++ INTERFACE src/client.hpp)
 target_include_directories(scrcpy++ PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
         $<INSTALL_INTERFACE:include/scrcpy++>
         PUBLIC ${BOOST_INCLUDE}
 )
 set_target_properties(scrcpy++ PROPERTIES LINKER_LANGUAGE CXX)
-target_link_libraries(scrcpy++ PUBLIC ${Boost_LIBRARIES})
+target_link_libraries(scrcpy++ INTERFACE ${Boost_LIBRARIES})
 
 add_executable(scrcpy++-test)
 target_include_directories(scrcpy++-test PUBLIC src)

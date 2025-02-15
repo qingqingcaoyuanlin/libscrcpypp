@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.25)
 project(scrcpy++ VERSION 1.1.1)
 
+cmake_policy(SET CMP0167 NEW)
+
 set(CMAKE_CXX_STANDARD 23)
 
 find_package(Boost 1.8.0 REQUIRED)
@@ -9,6 +11,7 @@ add_library(scrcpy++ STATIC src/client.hpp)
 target_include_directories(scrcpy++ PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
         $<INSTALL_INTERFACE:include/scrcpy++>
+        PUBLIC ${BOOST_INCLUDE}
 )
 set_target_properties(scrcpy++ PROPERTIES LINKER_LANGUAGE CXX)
 target_link_libraries(scrcpy++ INTERFACE ${Boost_LIBRARIES})

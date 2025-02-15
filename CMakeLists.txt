@@ -8,8 +8,6 @@ set(CMAKE_CXX_STANDARD 23)
 
 find_package(Boost 1.80.0 COMPONENTS ALL)
 
-include_directories(${Boost_INCLUDE_DIRS})
-
 add_library(scrcpy++ INTERFACE src/client.hpp)
 target_include_directories(scrcpy++ INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>

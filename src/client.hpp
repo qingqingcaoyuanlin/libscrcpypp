@@ -2,8 +2,8 @@
 // Created by ender on 25-2-5.
 //
 
-#ifndef CLIENT_HPP
-#define CLIENT_HPP
+#ifndef SCRCPY_CLIENT_HPP
+#define SCRCPY_CLIENT_HPP
 
 
 #include <iostream>
@@ -234,4 +234,4 @@ namespace scrcpy {
         std::queue<std::vector<std::byte> > frame_queue;
     };
 }
-#endif //CLIENT_HPP
+#endif //SCRCPY_CLIENT_HPP

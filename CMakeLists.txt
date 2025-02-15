@@ -21,7 +21,6 @@ target_link_libraries(scrcpy++-test PRIVATE scrcpy++)
 install(TARGETS scrcpy++
         ARCHIVE DESTINATION lib
 )
-install(DIRECTORY src DESTINATION include/scrcpy++)
 
 include(CMakePackageConfigHelpers)
 configure_package_config_file(

@@ -14,7 +14,7 @@
 #include <boost/asio.hpp>
 #include <boost/process.hpp>
 
-namespace scc {
+namespace scrcpy {
     class client : public std::enable_shared_from_this<client> {
     public:
         client(std::string addr, const std::uint16_t port) : addr(std::move(addr)), port(port) {

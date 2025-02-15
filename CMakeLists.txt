@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.25)
 project(scrcpy++ VERSION 1.1.2)
-if(WIN32)
+if (WIN32)
     add_compile_definitions(_WIN32_WINNT=0x0A00)
     add_compile_definitions(NOMINMAX)
-endif()
+endif ()
 set(CMAKE_CXX_STANDARD 23)
 
 find_package(Boost 1.80.0 COMPONENTS filesystem system REQUIRED)
@@ -15,7 +15,9 @@ target_include_directories(scrcpy++ PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
         $<INSTALL_INTERFACE:include/scrcpy++>
 )
-target_link_libraries(scrcpy++ PUBLIC ${Boost_LIBRARIES})
+target_link_libraries(scrcpy++
+        PUBLIC Boost::filesystem
+        PUBLIC Boost::system)
 
 add_executable(scrcpy++-test)
 target_include_directories(scrcpy++-test PUBLIC src)

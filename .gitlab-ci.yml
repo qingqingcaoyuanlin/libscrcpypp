@@ -9,6 +9,7 @@ build-linux-job:
     - cd build-linux
     - cmake G "Ninja Multi-Config"  ..
     - cmake --build . -j --config Release
+    - ls build-linux/Release
   artifacts:
     name: libscrcpy++-${CI_PIPELINE_ID}-linux-x64
     paths:
@@ -26,6 +27,6 @@ build-windows-job:
   artifacts:
     name: libscrcpy++-${CI_PIPELINE_ID}-windows-x64
     paths:
-      - build-windows/Release/libscrcpy++.lib
+      - build-windows/Release/scrcpy++.lib
   tags:
     - windows

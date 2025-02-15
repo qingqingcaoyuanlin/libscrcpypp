@@ -1,5 +1,6 @@
 stages:
   - build
+  - publish
 
 build-linux-job:
   stage: build
@@ -29,3 +30,17 @@ build-windows-job:
       - build-windows/Release/scrcpy++.lib
   tags:
     - windows
+
+build-docker-job:
+  stage: build
+  script:
+    - docker build -t enderthecoder/libscrcpypp:latest .
+  tags:
+    - linux
+
+publish-docker-job:
+  stage: publish
+  script:
+    - docker push enderthecoder/libscrcpypp
+  tags:
+    - linux

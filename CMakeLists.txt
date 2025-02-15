@@ -8,7 +8,7 @@ find_package(Boost 1.8.0 REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 
 add_library(scrcpy++ INTERFACE src/client.hpp)
-target_include_directories(scrcpy++ PUBLIC
+target_include_directories(scrcpy++ INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
         $<INSTALL_INTERFACE:include/scrcpy++>
         PUBLIC ${BOOST_INCLUDE}

@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.25)
 project(scrcpy++ VERSION 1.1.1)
-
+if(WIN32)
+    add_compile_definitions(_WIN32_WINNT=0x0A00)
+    add_compile_definitions(NOMINMAX)
+endif()
 set(CMAKE_CXX_STANDARD 23)
 
 find_package(Boost 1.80.0 COMPONENTS ALL)
@@ -11,7 +14,6 @@ add_library(scrcpy++ INTERFACE src/client.hpp)
 target_include_directories(scrcpy++ INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
         $<INSTALL_INTERFACE:include/scrcpy++>
-        PUBLIC ${BOOST_INCLUDE}
 )
 set_target_properties(scrcpy++ PROPERTIES LINKER_LANGUAGE CXX)
 target_link_libraries(scrcpy++ INTERFACE ${Boost_LIBRARIES})

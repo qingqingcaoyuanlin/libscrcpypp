@@ -8,13 +8,14 @@ set(CMAKE_CXX_STANDARD 23)
 
 find_package(Boost 1.80.0 COMPONENTS ALL)
 
-add_library(scrcpy++ INTERFACE src/client.hpp)
-target_include_directories(scrcpy++ INTERFACE
+include_directories(${Boost_INCLUDE_DIRS})
+
+add_library(scrcpy++ STATIC src/client.cpp)
+target_include_directories(scrcpy++ PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
         $<INSTALL_INTERFACE:include/scrcpy++>
 )
-set_target_properties(scrcpy++ PROPERTIES LINKER_LANGUAGE CXX)
-target_link_libraries(scrcpy++ INTERFACE ${Boost_LIBRARIES})
+target_link_libraries(scrcpy++ PUBLIC ${Boost_LIBRARIES})
 
 add_executable(scrcpy++-test)
 target_include_directories(scrcpy++-test PUBLIC src)

@@ -52,3 +52,15 @@ testing: [enderthecoder/libscrcpypp](https://hub.docker.com/repository/docker/en
 ```shell
 docker pull enderthecoder/libscrcpypp:latest
 ```
+
+## build && install
+Use following commands to build and install this lib on your machine. Notice that install lib might require sudo permission.
+```shell
+git clone https://github.com/EnderTheCoder/libscrcpypp
+cd libscrcpypp
+mkdir build
+cd build
+cmake ..
+cmake --build .
+cmake --install .
+```

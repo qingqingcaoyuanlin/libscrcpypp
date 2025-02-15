@@ -11,7 +11,7 @@ inline scrcpy::client::~client() {
     server_c.terminate();
 }
 
-inline auto scrcpy::client::connect() {
+inline auto scrcpy::client::connect() -> void {
     using boost::asio::ip::tcp;
     boost::asio::io_context io_context;
 
@@ -47,7 +47,7 @@ inline auto scrcpy::client::connect() {
     std::cout << "video stream working at resolution " << this->height << "x" << this->width << std::endl;
 }
 
-inline auto scrcpy::client::start_recv() {
+inline auto scrcpy::client::start_recv() -> void {
     this->recv_enabled = true;
     std::thread t([this] {
         while (true) {
@@ -77,11 +77,11 @@ inline auto scrcpy::client::start_recv() {
     t.detach();
 }
 
-inline auto scrcpy::client::stop_recv() {
+inline auto scrcpy::client::stop_recv() -> void {
     this->recv_enabled = false;
 }
 
-inline auto scrcpy::client::frame() {
+inline auto scrcpy::client::frame() -> std::vector<std::byte> {
     std::lock_guard guard(frame_mutex);
     return this->frame_queue.front();
 }
@@ -90,7 +90,8 @@ inline std::tuple<std::uint64_t, std::uint64_t> scrcpy::client::get_w_size() {
     return {width, height};
 }
 
-inline auto scrcpy::client::read_forward(const std::filesystem::path &adb_bin) {
+inline auto scrcpy::client::read_forward(
+    const std::filesystem::path &adb_bin) -> std::vector<std::array<std::string, 3> > {
     using namespace boost::process;
     ipstream out_stream;
     using std::operator""sv;
@@ -118,7 +119,7 @@ inline std::optional<std::string> scrcpy::client::forward_list_contains_tcp_port
     return std::nullopt;
 }
 
-inline auto scrcpy::client::list_dev_serials(const std::filesystem::path &adb_bin) {
+inline auto scrcpy::client::list_dev_serials(const std::filesystem::path &adb_bin) -> std::vector<std::string> {
     using namespace boost::process;
     ipstream out_stream;
     using std::operator""sv;

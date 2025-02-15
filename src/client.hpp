@@ -16,28 +16,28 @@
 namespace scrcpy {
     class client : public std::enable_shared_from_this<client> {
     public:
-        client(std::string addr, const std::uint16_t port);
+        client(std::string addr, std::uint16_t port);
 
         ~client();
 
-        auto connect();
+        auto connect() -> void;
 
-        auto start_recv();
+        auto start_recv() -> void;
 
-        auto stop_recv();
+        auto stop_recv() -> void;
 
-        auto frame();
+        auto frame() -> std::vector<std::byte>;
 
         std::tuple<std::uint64_t, std::uint64_t> get_w_size();
 
-        static auto read_forward(const std::filesystem::path &adb_bin);
+        static auto read_forward(const std::filesystem::path &adb_bin) -> std::vector<std::array<std::string, 3> >;
 
         static auto forward_list_contains_tcp_port(
-            const std::filesystem::path &adb_bin, const std::uint16_t port) -> std::optional<std::string>;
+            const std::filesystem::path &adb_bin, std::uint16_t port) -> std::optional<std::string>;
 
-        static auto list_dev_serials(const std::filesystem::path &adb_bin);
+        static auto list_dev_serials(const std::filesystem::path &adb_bin) -> std::vector<std::string>;
 
-        auto get_codec() {
+        auto get_codec() -> std::string {
             return this->codec;
         }
 
@@ -65,6 +65,5 @@ namespace scrcpy {
         std::mutex frame_mutex;
         std::queue<std::vector<std::byte> > frame_queue;
     };
-
 }
 #endif //SCRCPY_CLIENT_HPP

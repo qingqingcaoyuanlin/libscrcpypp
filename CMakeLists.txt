@@ -6,7 +6,7 @@ if(WIN32)
 endif()
 set(CMAKE_CXX_STANDARD 23)
 
-find_package(Boost 1.80.0 COMPONENTS ALL)
+find_package(Boost 1.80.0 COMPONENTS filesystem system REQUIRED)
 
 include_directories(${Boost_INCLUDE_DIRS})
 

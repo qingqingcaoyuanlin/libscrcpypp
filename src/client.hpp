@@ -55,6 +55,8 @@ namespace scrcpy {
                     const std::optional<std::string> &device_serial = std::nullopt) -> void;
 
     private:
+        auto run_recv() -> void;
+
         std::string addr;
         std::uint16_t port;
 
@@ -79,7 +81,7 @@ namespace scrcpy {
         std::deque<AVFrame *> frame_queue;
 
         h264_decoder decoder;
-        AVPacket *config_packet;
+        AVPacket *config_packet = nullptr;
     };
 }
 #endif //SCRCPY_CLIENT_HPP

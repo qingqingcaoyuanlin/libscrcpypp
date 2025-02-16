@@ -39,6 +39,16 @@ int main(int argc, char *argv[]) {
 }
 ```
 
+Use cmake to find package and link static library.
+
+```cmake
+
+find_package(scrcpy++ REQUIRED)
+
+target_link_libraries(example-target PUBLIC scrcpy::scrcpy++)
+
+```
+
 ## build requirements
 
 - Boost 1.8.0+

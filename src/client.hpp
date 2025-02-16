@@ -7,11 +7,13 @@
 
 
 #include <utility>
-#include <queue>
+#include <deque>
 #include <filesystem>
 #include <ranges>
 #include <boost/asio.hpp>
 #include <boost/process.hpp>
+
+#include "decoder.hpp"
 
 namespace scrcpy {
     class client : public std::enable_shared_from_this<client> {
@@ -26,9 +28,13 @@ namespace scrcpy {
 
         auto stop_recv() -> void;
 
-        auto frame() -> std::vector<std::byte>;
+        auto start_decode() -> void;
 
-        std::tuple<std::uint64_t, std::uint64_t> get_w_size();
+        auto stop_decode() -> void;
+
+        [[nodiscard]] auto frames() -> std::vector<AVFrame *>;
+
+        auto get_w_size() -> std::tuple<std::uint64_t, std::uint64_t>;
 
         static auto read_forward(const std::filesystem::path &adb_bin) -> std::vector<std::array<std::string, 3> >;
 
@@ -59,11 +65,19 @@ namespace scrcpy {
         boost::process::child server_c;
 
         std::atomic<bool> recv_enabled{false};
-
+        std::atomic<bool> parse_enabled{false};
         std::shared_ptr<boost::asio::ip::tcp::socket> video_socket;
 
+
+        std::mutex raw_mutex;
         std::mutex frame_mutex;
-        std::queue<std::vector<std::byte> > frame_queue;
+
+        std::condition_variable decode_cv;
+
+        std::deque<std::byte> raw_queue;
+        std::deque<AVFrame *> frame_queue;
+
+        h264_decoder decoder;
     };
 }
 #endif //SCRCPY_CLIENT_HPP

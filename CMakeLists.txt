@@ -7,17 +7,30 @@ endif ()
 set(CMAKE_CXX_STANDARD 23)
 
 find_package(Boost 1.80.0 COMPONENTS filesystem system REQUIRED)
-
+find_package(PkgConfig REQUIRED)
+find_package(OpenCV 4.0 REQUIRED)
+pkg_check_modules(LIBAV REQUIRED IMPORTED_TARGET
+        libavdevice
+        libavfilter
+        libavformat
+        libavcodec
+        libswresample
+        libswscale
+        libavutil
+)
 include_directories(${Boost_INCLUDE_DIRS})
 
-add_library(scrcpy++ STATIC src/client.cpp)
+add_library(scrcpy++ STATIC src/client.cpp src/decoder.cpp)
 target_include_directories(scrcpy++ PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
         $<INSTALL_INTERFACE:include/scrcpy++>
 )
 target_link_libraries(scrcpy++
         PUBLIC Boost::filesystem
-        PUBLIC Boost::system)
+        PUBLIC Boost::system
+        PUBLIC PkgConfig::LIBAV
+        PUBLIC ${OpenCV_LIBS}
+)
 
 add_executable(scrcpy++-test)
 target_include_directories(scrcpy++-test PUBLIC src)

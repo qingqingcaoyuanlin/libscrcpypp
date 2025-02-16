@@ -2,7 +2,6 @@
 // Created by ender on 25-2-15.
 //
 #include <client.hpp>
-#include <iostream>
 
 namespace scrcpy {
     client::client(std::string addr, std::uint16_t port): addr(std::move(addr)), port(port) {
@@ -44,8 +43,9 @@ namespace scrcpy {
         std::reverse(codec_meta_buffer.begin() + 4, codec_meta_buffer.begin() + 8);
         std::reverse(codec_meta_buffer.begin() + 8, codec_meta_buffer.end());
         this->width = *reinterpret_cast<std::uint32_t *>(codec_meta_buffer.data() + 4);
-        this->height = *reinterpret_cast<std::uint32_t *>(codec_meta_buffer.data() + 8);
-        std::cout << "video stream working at resolution " << this->height << "x" << this->width << std::endl;
+        this->height = *reinterpret_cast<std::uint32_t *>(codec_meta_buffer.data() + 8);\
+        std::cout << "video stream codec: " << this->codec << std::endl;
+        std::cout << "video stream working at resolution: " << this->height << "x" << this->width << std::endl;
     }
 
     auto client::start_recv() -> void {
@@ -55,24 +55,13 @@ namespace scrcpy {
                 if (not recv_enabled) {
                     break;
                 }
-                std::vector<std::byte> frame_buffer;
-                frame_buffer.reserve(0x10000);
-
-                while (true) {
-                    std::array<std::byte, 0x10000> net_buffer = {};
-
-                    const auto size = this->video_socket->read_some(boost::asio::buffer(net_buffer));
-                    frame_buffer.insert(frame_buffer.end(), net_buffer.begin(), net_buffer.begin() + size);
-                    if (size < 0x10000) {
-                        break;
-                    }
-                }
-                std::cout << "frame received with size" << frame_buffer.size() << std::endl;
-                std::lock_guard guard(frame_mutex);
-                this->frame_queue.emplace(std::move(frame_buffer));
-                if (this->frame_queue.size() > 3) {
-                    this->frame_queue.pop();
-                }
+                std::array<std::byte, 0x10000> frame_buffer{};
+                size_t size = 0;
+                size = this->video_socket->read_some(boost::asio::buffer(frame_buffer));
+                if (size == 0) continue;
+                std::lock_guard guard(raw_mutex);
+                this->raw_queue.insert(this->raw_queue.end(), frame_buffer.begin(), frame_buffer.begin() + size);
+                decode_cv.notify_one();
             }
         });
         t.detach();
@@ -82,12 +71,48 @@ namespace scrcpy {
         this->recv_enabled = false;
     }
 
-    auto client::frame() -> std::vector<std::byte> {
-        std::lock_guard guard(frame_mutex);
-        return this->frame_queue.front();
+    auto client::start_decode() -> void {
+        parse_enabled = true;
+        std::thread t([this] {
+            while (true) {
+                if (not parse_enabled) {
+                    break;
+                }
+                std::unique_lock lock(raw_mutex);
+                decode_cv.wait(lock, [this] {
+                    return !raw_queue.empty();
+                });
+                std::vector<std::byte> decode_buffer;
+                decode_buffer.insert(decode_buffer.end(), raw_queue.begin(), raw_queue.end());
+                raw_queue.clear();
+                lock.unlock();
+                const auto frames = decoder.decode(std::span{decode_buffer});
+                if (frames.empty()) {
+                    continue;
+                }
+                std::lock_guard guard(frame_mutex);
+                frame_queue.insert(frame_queue.end(), frames.begin(), frames.end());
+            }
+        });
+        t.detach();
     }
 
-    std::tuple<std::uint64_t, std::uint64_t> scrcpy::client::get_w_size() {
+    auto client::stop_decode() -> void {
+        parse_enabled = false;
+    }
+
+    auto client::frames() -> std::vector<AVFrame *> {
+        std::lock_guard guard(frame_mutex);
+        if (frame_queue.empty()) {
+            return {};
+        }
+        std::vector<AVFrame *> frames = {};
+        frames.insert(frames.end(), frame_queue.begin(), frame_queue.end());
+        frame_queue.clear();
+        return frames;
+    }
+
+    auto client::get_w_size() -> std::tuple<std::uint64_t, std::uint64_t> {
         return {width, height};
     }
 
@@ -100,7 +125,6 @@ namespace scrcpy {
         std::vector<std::array<std::string, 3> > forward_list;
         list_c.wait();
         for (std::string line; out_stream && std::getline(out_stream, line) && !line.empty();) {
-            std::cout << "line: " << line << std::endl;
             auto item = std::array<std::string, 3>{};
             for (const auto [idx, part]: std::views::split(line, " "sv) | std::views::enumerate) {
                 item.at(idx) = std::string_view(part);

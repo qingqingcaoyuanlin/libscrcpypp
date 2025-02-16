@@ -10,6 +10,7 @@
 #include <deque>
 #include <filesystem>
 #include <ranges>
+#include <bitset>
 #include <boost/asio.hpp>
 #include <boost/process.hpp>
 
@@ -28,9 +29,9 @@ namespace scrcpy {
 
         auto stop_recv() -> void;
 
-        auto start_decode() -> void;
-
-        auto stop_decode() -> void;
+        // auto start_decode() -> void;
+        //
+        // auto stop_decode() -> void;
 
         [[nodiscard]] auto frames() -> std::vector<AVFrame *>;
 
@@ -69,15 +70,16 @@ namespace scrcpy {
         std::shared_ptr<boost::asio::ip::tcp::socket> video_socket;
 
 
-        std::mutex raw_mutex;
+        // std::mutex raw_mutex;
         std::mutex frame_mutex;
 
-        std::condition_variable decode_cv;
+        // std::condition_variable decode_cv;
 
-        std::deque<std::byte> raw_queue;
+        // std::deque<std::byte> raw_queue;
         std::deque<AVFrame *> frame_queue;
 
         h264_decoder decoder;
+        AVPacket *config_packet;
     };
 }
 #endif //SCRCPY_CLIENT_HPP

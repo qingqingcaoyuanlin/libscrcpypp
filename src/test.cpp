@@ -11,12 +11,11 @@ int main(int argc, char *argv[]) {
     std::this_thread::sleep_for(std::chrono::seconds(1)); // wait  1 sec for scrcpy server to start up
     cli.connect();
     cli.start_recv();
-    cli.start_decode();
+    // cli.start_decode();
     // auto frame = cli.frame();
     // do the codec stuff
     auto codec = cli.get_codec();
     auto [w, h] = cli.get_w_size();
-    // std::this_thread::sleep_for(std::chrono::seconds(60));
     while (true) {
         for (auto frame: cli.frames()) {
             std::printf("pixel format:%s\n", av_get_pix_fmt_name(static_cast<AVPixelFormat>(frame->format)));
@@ -26,7 +25,7 @@ int main(int argc, char *argv[]) {
             av_frame_free(&frame);
         }
     }
-    cli.stop_decode();
+    // cli.stop_decode();
     cli.stop_recv();
     return 0;
 }

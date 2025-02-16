@@ -34,11 +34,11 @@ public:
         avcodec_free_context(&codec_ctx);
     }
 
-    [[nodiscard]] std::vector<AVFrame *> decode(std::span<std::byte> data) const {
-        AVPacket *packet = av_packet_alloc();
-        packet->data = reinterpret_cast<std::uint8_t *>(data.data());
-        packet->size = static_cast<int>(data.size());
-
+    [[nodiscard]] std::vector<AVFrame *> decode(AVPacket *packet) const {
+        if (packet->pts == AV_NOPTS_VALUE) {
+            std::cerr << "Skipping config packet" << std::endl;
+            return {};
+        }
         if (avcodec_send_packet(codec_ctx, packet) != 0) {
             av_packet_free(&packet);
             return {};

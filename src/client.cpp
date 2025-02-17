@@ -4,6 +4,10 @@
 #include <client.hpp>
 
 namespace scrcpy {
+    auto client::create_shared(const std::string &addr, std::uint16_t port) -> std::shared_ptr<client> {
+        return std::make_shared<client>(addr, port);
+    }
+
     client::client(std::string addr, const std::uint16_t port): addr(std::move(addr)), port(port) {
     }
 
@@ -136,8 +140,8 @@ namespace scrcpy {
     }
 
     auto client::start_recv() -> void {
-        recv_handle = std::thread([this] {
-            this->run_recv();
+        recv_handle = std::thread([t = shared_from_this()] {
+            t->run_recv();
         });
     }
 

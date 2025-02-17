@@ -19,6 +19,8 @@
 namespace scrcpy {
     class client : public std::enable_shared_from_this<client> {
     public:
+        static auto create_shared(const std::string& addr, std::uint16_t port) -> std::shared_ptr<client>;
+
         client(std::string addr, std::uint16_t port);
 
         ~client();

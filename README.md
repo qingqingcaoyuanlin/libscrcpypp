@@ -3,9 +3,9 @@
 [![C++](https://img.shields.io/badge/C++-23-blue)](https://en.cppreference.com/w/cpp/23)
 [![License](https://img.shields.io/badge/License-MIT-blue)](LICENSE)
 
-[![Actions Workflow Windows](https://github.com/deniskovalchuk/ftp-client/actions/workflows/windows.yml/badge.svg)](https://github.com/deniskovalchuk/ftp-client/actions/workflows/windows.yml)
-[![Actions Workflow Linux](https://github.com/deniskovalchuk/ftp-client/actions/workflows/linux.yml/badge.svg)](https://github.com/deniskovalchuk/ftp-client/actions/workflows/linux.yml)
-[![Actions Workflow macOS](https://github.com/deniskovalchuk/ftp-client/actions/workflows/macos.yml/badge.svg)](https://github.com/deniskovalchuk/ftp-client/actions/workflows/macos.yml)
+![Actions Workflow Windows](https://github.com/deniskovalchuk/ftp-client/actions/workflows/windows.yml/badge.svg)
+![Actions Workflow Linux](https://github.com/deniskovalchuk/ftp-client/actions/workflows/linux.yml/badge.svg)
+![Actions Workflow macOS](https://github.com/deniskovalchuk/ftp-client/actions/workflows/macos.yml/badge.svg)
 
 A simple C++ implementation of scrcpy client build on C++23
 and [Boost.Asio](https://www.boost.org/doc/libs/1_87_0/doc/html/boost_asio.html). Use this lib to capture video stream

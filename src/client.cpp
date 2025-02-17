@@ -8,11 +8,21 @@ namespace scrcpy {
     }
 
     client::~client() {
+        stop_recv();
+        if (recv_handle.joinable()) recv_handle.join();
         if (config_packet != nullptr) {
             av_packet_free(&config_packet);
         }
-        for (auto & it : frame_queue) {
-            av_frame_free(&it);
+        for (auto frame: frames()) {
+            av_frame_free(&frame);
+        }
+        if (video_socket != nullptr and video_socket->is_open()) {
+            video_socket->close();
+        }
+
+        if (server_c.running()) {
+            server_c.terminate();
+            server_c.wait();
         }
     }
 
@@ -119,16 +129,16 @@ namespace scrcpy {
             if (frames.empty()) {
                 continue;
             }
-            std::lock_guard guard(frame_mutex);
+            frame_mutex.lock();
             frame_queue.insert(frame_queue.end(), frames.begin(), frames.end());
+            frame_mutex.unlock();
         }
     }
 
     auto client::start_recv() -> void {
-        std::thread t([this] {
+        recv_handle = std::thread([this] {
             this->run_recv();
         });
-        t.detach();
     }
 
     auto client::stop_recv() -> void {
@@ -170,13 +180,14 @@ namespace scrcpy {
     // }
 
     auto client::frames() -> std::vector<AVFrame *> {
-        std::lock_guard guard(frame_mutex);
+        frame_mutex.lock();
         if (frame_queue.empty()) {
             return {};
         }
         std::vector<AVFrame *> frames = {};
         frames.insert(frames.end(), frame_queue.begin(), frame_queue.end());
         frame_queue.clear();
+        frame_mutex.unlock();
         return frames;
     }
 
@@ -289,6 +300,6 @@ namespace scrcpy {
             }
         }
 
-        server_c = child{exec_cmd};
+        server_c = child{exec_cmd, std_out > server_out_stream};
     }
 }

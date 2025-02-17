@@ -67,7 +67,10 @@ namespace scrcpy {
         std::uint32_t height{0};
         std::uint32_t width{0};
 
+        std::thread recv_handle;
+
         boost::process::child server_c;
+        boost::process::ipstream server_out_stream;
 
         std::atomic<bool> recv_enabled{false};
         std::atomic<bool> parse_enabled{false};

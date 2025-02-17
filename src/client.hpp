@@ -11,15 +11,16 @@
 #include <filesystem>
 #include <ranges>
 #include <bitset>
+
 #include <boost/asio.hpp>
 #include <boost/process.hpp>
 
 #include "decoder.hpp"
-
+#include "frame.hpp"
 namespace scrcpy {
     class client : public std::enable_shared_from_this<client> {
     public:
-        static auto create_shared(const std::string& addr, std::uint16_t port) -> std::shared_ptr<client>;
+        static auto create_shared(const std::string &addr, std::uint16_t port) -> std::shared_ptr<client>;
 
         client(std::string addr, std::uint16_t port);
 
@@ -37,9 +38,9 @@ namespace scrcpy {
         //
         // auto stop_decode() -> void;
 
-        [[nodiscard]] auto frames() -> std::vector<AVFrame *>;
+        auto frames() -> std::vector<std::shared_ptr<frame> >;
 
-        auto get_w_size() -> std::tuple<std::uint64_t, std::uint64_t>;
+        auto video_size() -> std::tuple<std::uint64_t, std::uint64_t>;
 
         static auto read_forward(const std::filesystem::path &adb_bin) -> std::vector<std::array<std::string, 3> >;
 
@@ -76,9 +77,9 @@ namespace scrcpy {
 
         std::atomic<bool> recv_enabled{false};
         std::atomic<bool> parse_enabled{false};
-        std::shared_ptr<boost::asio::io_context> io_context;
-        std::shared_ptr<boost::asio::ip::tcp::socket> video_socket;
 
+        std::shared_ptr<boost::asio::ip::tcp::socket> video_socket;
+        std::shared_ptr<boost::asio::io_context> io_context;
 
         // std::mutex raw_mutex;
         std::mutex frame_mutex;
@@ -86,7 +87,7 @@ namespace scrcpy {
         // std::condition_variable decode_cv;
 
         // std::deque<std::byte> raw_queue;
-        std::deque<AVFrame *> frame_queue;
+        std::deque<std::shared_ptr<frame> > frame_queue;
 
         h264_decoder decoder;
         AVPacket *config_packet = nullptr;

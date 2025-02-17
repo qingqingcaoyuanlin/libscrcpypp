@@ -20,7 +20,7 @@ namespace scrcpy {
         avcodec_free_context(&codec_ctx);
     }
 
-    std::vector<AVFrame *> h264_decoder::decode(AVPacket *packet) const {
+    std::vector<std::shared_ptr<frame> > h264_decoder::decode(AVPacket *packet) const {
         if (packet->pts == AV_NOPTS_VALUE) {
             return {};
         }
@@ -30,7 +30,7 @@ namespace scrcpy {
         }
         av_packet_free(&packet);
 
-        std::vector<AVFrame *> frames;
+        std::vector<std::shared_ptr<frame> > frames;
         AVFrame *frame = av_frame_alloc();
         while (true) {
             const int ret = avcodec_receive_frame(codec_ctx, frame);
@@ -38,22 +38,9 @@ namespace scrcpy {
             if (ret < 0) break;
 
             AVFrame *cloned = av_frame_clone(frame);
-            frames.push_back(cloned);
+            frames.push_back(frame::create_shared(cloned));
         }
         av_frame_free(&frame);
         return frames;
-    }
-
-    auto h264_decoder::avframe_to_mat(const AVFrame *frame) -> cv::Mat {
-        const auto width = frame->width;
-        const auto height = frame->height;
-        cv::Mat image(height, width, CV_8UC3);
-        std::array<std::int32_t, 1> cv_lines_size{};
-        cv_lines_size.at(0) = static_cast<std::int32_t>(image.step1());
-        SwsContext *conversion = sws_getContext(width, height, static_cast<AVPixelFormat>(frame->format), width, height,
-                                                AV_PIX_FMT_BGR24, SWS_FAST_BILINEAR, nullptr, nullptr, nullptr);
-        sws_scale(conversion, frame->data, frame->linesize, 0, height, &image.data, cv_lines_size.data());
-        sws_freeContext(conversion);
-        return image;
     }
 }

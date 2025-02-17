@@ -17,9 +17,6 @@ namespace scrcpy {
         if (config_packet != nullptr) {
             av_packet_free(&config_packet);
         }
-        for (auto frame: frames()) {
-            av_frame_free(&frame);
-        }
         if (video_socket != nullptr and video_socket->is_open()) {
             video_socket->cancel();
             video_socket->close();
@@ -184,19 +181,19 @@ namespace scrcpy {
     //     parse_enabled = false;
     // }
 
-    auto client::frames() -> std::vector<AVFrame *> {
+    auto client::frames() -> std::vector<std::shared_ptr<frame>> {
         frame_mutex.lock();
         if (frame_queue.empty()) {
             return {};
         }
-        std::vector<AVFrame *> frames = {};
+        std::vector<std::shared_ptr<frame>> frames = {};
         frames.insert(frames.end(), frame_queue.begin(), frame_queue.end());
         frame_queue.clear();
         frame_mutex.unlock();
         return frames;
     }
 
-    auto client::get_w_size() -> std::tuple<std::uint64_t, std::uint64_t> {
+    auto client::video_size() -> std::tuple<std::uint64_t, std::uint64_t> {
         return {width, height};
     }
 

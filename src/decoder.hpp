@@ -6,6 +6,7 @@
 #define DECODER_HPP
 
 
+#include <frame.hpp>
 #include <iostream>
 #include <vector>
 #include <opencv2/opencv.hpp>
@@ -16,6 +17,7 @@ extern "C" {
 #include <libavutil/imgutils.h>
 #include <libswscale/swscale.h>
 }
+
 namespace scrcpy {
     class h264_decoder {
     public:
@@ -23,9 +25,7 @@ namespace scrcpy {
 
         ~h264_decoder();
 
-        [[nodiscard]] std::vector<AVFrame *> decode(AVPacket *packet) const;
-
-        static auto avframe_to_mat(const AVFrame *frame) -> cv::Mat ;
+        std::vector<std::shared_ptr<frame> > decode(AVPacket *packet) const;
 
     private:
         const AVCodec *codec = nullptr;

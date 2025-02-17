@@ -11,16 +11,15 @@ int main(int argc, char *argv[]) {
     std::this_thread::sleep_for(std::chrono::seconds(1)); // wait  1 sec for scrcpy server to start up
     cli->connect();
     cli->run_recv();
-    auto frames = cli->frames();
     auto codec = cli->get_codec();
-    auto [w, h] = cli->get_w_size();
-    for (auto frame: frames) {
-        std::printf("pixel format:%s\n", av_get_pix_fmt_name(static_cast<AVPixelFormat>(frame->format)));
-        std::printf("h:%d w:%d\n", frame->height, frame->width);
-        auto mat = scrcpy::h264_decoder::avframe_to_mat(frame);
-        imshow("image", mat);
-        av_frame_free(&frame);
+    auto [w, h] = cli->video_size();
+    std::printf("video size: [h:%lu,w:%lu]\n", w, h);
+    for (const auto &frame: cli->frames()) {
+        std::printf("pixel format:%s\n", av_get_pix_fmt_name(static_cast<AVPixelFormat>(frame->raw()->format)));
+        std::printf("h:%d w:%d\n", frame->raw()->height, frame->raw()->width);
+        auto mat = frame->mat();
+        imwrite("test.png", *mat);
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
-    cli->stop_recv();
     return 0;
 }

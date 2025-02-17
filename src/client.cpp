@@ -119,7 +119,6 @@ namespace scrcpy {
         }
     }
 
-
     auto client::start_recv() -> void {
         std::thread t([this] {
             this->run_recv();
@@ -237,13 +236,13 @@ namespace scrcpy {
                         const std::optional<std::string> &device_serial) -> void {
         //adb shell CLASSPATH=/sdcard/scrcpy-server.jar app_process / com.genymobile.scrcpy.Server 3.1 tunnel_forward=true cleanup=false audio=false control=false max_size=1920
         using namespace boost::process;
-        ipstream out_stream;
         auto adb_exec = adb_bin.string();
         std::string serial;
         if (device_serial.has_value()) {
             adb_exec += " -s " + device_serial.value();
             serial = device_serial.value();
         } else {
+            ipstream out_stream;
             auto serial_c = child(std::format("{} get-serialno", adb_exec), std_out > out_stream);
             serial_c.wait();
             if (serial_c.exit_code() != 0) {

@@ -37,6 +37,11 @@ target_include_directories(scrcpy++-test PUBLIC src)
 target_sources(scrcpy++-test PRIVATE src/test.cpp)
 target_link_libraries(scrcpy++-test PRIVATE scrcpy++)
 
+add_executable(scrcpy++-test-async)
+target_include_directories(scrcpy++-test-async PUBLIC src)
+target_sources(scrcpy++-test-async PRIVATE src/test_async.cpp)
+target_link_libraries(scrcpy++-test-async PRIVATE scrcpy++)
+
 install(TARGETS scrcpy++
         ARCHIVE DESTINATION lib
 )

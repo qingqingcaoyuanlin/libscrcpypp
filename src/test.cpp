@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
         std::printf("pixel format:%s\n", av_get_pix_fmt_name(static_cast<AVPixelFormat>(frame->format)));
         std::printf("h:%d w:%d\n", frame->height, frame->width);
         auto mat = h264_decoder::avframe_to_mat(frame);
-        cv::imshow("image", mat);
+        imshow("image", mat);
         av_frame_free(&frame);
     }
 

@@ -8,7 +8,6 @@ namespace scrcpy {
     }
 
     client::~client() {
-        server_c.terminate();
         if (config_packet != nullptr) {
             av_packet_free(&config_packet);
         }

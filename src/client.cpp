@@ -9,6 +9,12 @@ namespace scrcpy {
 
     client::~client() {
         server_c.terminate();
+        if (config_packet != nullptr) {
+            av_packet_free(&config_packet);
+        }
+        for (auto & it : frame_queue) {
+            av_frame_free(&it);
+        }
     }
 
     auto client::connect() -> void {

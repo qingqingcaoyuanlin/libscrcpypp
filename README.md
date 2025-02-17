@@ -18,6 +18,12 @@ and high-quality.
 - Prepare a scrcpy-server jar and get its exact version.
 - Make sure that your android devices are already connected to your host.
 
+## codec support
+
+- H.264 ✓
+- H.265 ✕
+- AV1 ✕
+
 ## example
 
 ```c++

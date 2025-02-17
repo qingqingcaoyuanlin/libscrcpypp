@@ -66,9 +66,11 @@ target_link_libraries(example-target PUBLIC scrcpy::scrcpy++)
 
 ## build requirements
 
-- Boost 1.8.0+
+- Boost 1.80.0+
 - C++ compiler that supports C++23 standard
 - Windows or any unix-like system
+- opencv 4.x
+- ffmpeg libs
 
 ## docker
 

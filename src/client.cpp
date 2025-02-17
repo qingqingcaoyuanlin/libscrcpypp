@@ -49,6 +49,7 @@ namespace scrcpy {
     }
 
     auto client::run_recv() -> void {
+        recv_enabled = true;
         while (true) {
             if (not recv_enabled) {
                 break;
@@ -79,7 +80,11 @@ namespace scrcpy {
 
             if (frame_size != packet_size) {
                 av_packet_free(&packet);
-                continue;
+                if (this->config_packet != nullptr) {
+                    av_packet_free(&this->config_packet);
+                }
+                std::cerr << "end of video stream" << std::endl;
+                break;
             }
             if (config_flag) {
                 packet->pts = AV_NOPTS_VALUE;
@@ -116,7 +121,6 @@ namespace scrcpy {
 
 
     auto client::start_recv() -> void {
-        this->recv_enabled = true;
         std::thread t([this] {
             this->run_recv();
         });
@@ -270,7 +274,7 @@ namespace scrcpy {
                 );
             }
         } else {
-            child forward_c(forward_cmd, std_out > out_stream);
+            child forward_c(forward_cmd);
             forward_c.wait();
             if (forward_c.exit_code() != 0) {
                 throw std::runtime_error("error forwarding scrcpy to local tcp port");

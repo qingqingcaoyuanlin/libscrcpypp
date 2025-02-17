@@ -10,7 +10,7 @@ int main(int argc, char *argv[]) {
     cli.deploy("adb", "scrcpy-server", "3.1", 1234);
     std::this_thread::sleep_for(std::chrono::seconds(1)); // wait  1 sec for scrcpy server to start up
     cli.connect();
-    cli.start_recv();
+    cli.run_recv();
     // cli.start_decode();
     // auto frame = cli.frame();
     // do the codec stuff

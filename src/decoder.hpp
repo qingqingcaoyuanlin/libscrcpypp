@@ -36,7 +36,6 @@ public:
 
     [[nodiscard]] std::vector<AVFrame *> decode(AVPacket *packet) const {
         if (packet->pts == AV_NOPTS_VALUE) {
-            std::cerr << "Skipping config packet" << std::endl;
             return {};
         }
         if (avcodec_send_packet(codec_ctx, packet) != 0) {

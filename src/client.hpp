@@ -48,6 +48,8 @@ namespace scrcpy {
             return this->codec;
         }
 
+        auto run_recv() -> void;
+
         auto deploy(const std::filesystem::path &adb_bin,
                     const std::filesystem::path &scrcpy_jar_bin,
                     const std::string &scrcpy_server_version,
@@ -55,8 +57,6 @@ namespace scrcpy {
                     const std::optional<std::string> &device_serial = std::nullopt) -> void;
 
     private:
-        auto run_recv() -> void;
-
         std::string addr;
         std::uint16_t port;
 

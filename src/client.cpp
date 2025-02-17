@@ -131,6 +131,10 @@ namespace scrcpy {
         this->recv_enabled = false;
     }
 
+    auto client::is_recv_enabled() -> bool {
+        return this->recv_enabled;
+    }
+
     // auto client::start_decode() -> void {
     //     parse_enabled = true;
     //     std::thread t([this] {

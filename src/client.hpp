@@ -29,6 +29,8 @@ namespace scrcpy {
 
         auto stop_recv() -> void;
 
+        auto is_recv_enabled() -> bool;
+
         // auto start_decode() -> void;
         //
         // auto stop_decode() -> void;

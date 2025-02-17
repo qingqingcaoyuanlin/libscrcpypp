@@ -17,6 +17,7 @@
 
 #include "decoder.hpp"
 #include "frame.hpp"
+
 namespace scrcpy {
     class client : public std::enable_shared_from_this<client> {
     public:
@@ -33,6 +34,8 @@ namespace scrcpy {
         auto stop_recv() -> void;
 
         auto is_recv_enabled() -> bool;
+
+        auto set_frame_consumer(std::function<void(std::shared_ptr<frame>)> consumer) -> void ;
 
         // auto start_decode() -> void;
         //
@@ -91,6 +94,8 @@ namespace scrcpy {
 
         h264_decoder decoder;
         AVPacket *config_packet = nullptr;
+
+        std::optional<std::function<void(std::shared_ptr<frame>)> > consumer;
     };
 }
 #endif //SCRCPY_CLIENT_HPP

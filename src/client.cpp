@@ -131,6 +131,14 @@ namespace scrcpy {
             if (frames.empty()) {
                 continue;
             }
+
+            if (this->consumer.has_value()) {
+                for (const auto &frame : frames) {
+                    this->consumer.value()(frame);
+                }
+                continue;
+            }
+
             frame_mutex.lock();
             frame_queue.insert(frame_queue.end(), frames.begin(), frames.end());
             frame_mutex.unlock();
@@ -149,6 +157,10 @@ namespace scrcpy {
 
     auto client::is_recv_enabled() -> bool {
         return this->recv_enabled;
+    }
+
+    auto client::set_frame_consumer(std::function<void(std::shared_ptr<frame>)> consumer) -> void {
+        this->consumer = consumer;
     }
 
     // auto client::start_decode() -> void {

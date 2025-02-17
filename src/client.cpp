@@ -21,6 +21,7 @@ namespace scrcpy {
             av_frame_free(&frame);
         }
         if (video_socket != nullptr and video_socket->is_open()) {
+            video_socket->cancel();
             video_socket->close();
         }
 
@@ -32,12 +33,12 @@ namespace scrcpy {
 
     auto client::connect() -> void {
         using boost::asio::ip::tcp;
-        boost::asio::io_context io_context;
+        io_context = std::make_shared<boost::asio::io_context>();
 
-        tcp::resolver resolver(io_context);
+        tcp::resolver resolver(*io_context);
         const auto endpoints = resolver.resolve(addr, std::to_string(port));
 
-        this->video_socket = std::make_shared<tcp::socket>(io_context);
+        this->video_socket = std::make_shared<tcp::socket>(*io_context);
         boost::asio::connect(*this->video_socket, endpoints);
 
         std::array<char, 1> dummy_byte_buffer = {};

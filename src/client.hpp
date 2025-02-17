@@ -76,6 +76,7 @@ namespace scrcpy {
 
         std::atomic<bool> recv_enabled{false};
         std::atomic<bool> parse_enabled{false};
+        std::shared_ptr<boost::asio::io_context> io_context;
         std::shared_ptr<boost::asio::ip::tcp::socket> video_socket;
 
 

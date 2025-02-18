@@ -102,8 +102,12 @@ namespace scrcpy {
                 }
                 std::cerr << "end of video stream" << std::endl;
                 this->stop_recv();
-                break;
+                if (this->consumer.has_value()) {
+                    this->consumer.value()(nullptr);
+                }
+                return;
             }
+
             if (config_flag) {
                 packet->pts = AV_NOPTS_VALUE;
             } else {

@@ -101,6 +101,7 @@ namespace scrcpy {
                     av_packet_free(&this->config_packet);
                 }
                 std::cerr << "end of video stream" << std::endl;
+                this->stop_recv();
                 break;
             }
             if (config_flag) {

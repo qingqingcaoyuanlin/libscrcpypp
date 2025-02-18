@@ -16,10 +16,14 @@ int main(int argc, char *argv[]) {
     auto codec = cli->get_codec();
     auto [w, h] = cli->video_size();
     std::printf("video size: [h:%lu,w:%lu]\n", w, h);
-    cli->set_frame_consumer([](const auto& frame) {
+    cli->set_frame_consumer([](const auto &frame) {
         std::printf("pixel format:%s\n", av_get_pix_fmt_name(static_cast<AVPixelFormat>(frame->raw()->format)));
         std::printf("h:%d w:%d\n", frame->raw()->height, frame->raw()->width);
+        auto t1 = std::chrono::high_resolution_clock::now();
         auto mat = frame->mat();
+        auto t2 = std::chrono::high_resolution_clock::now();
+        auto time_span = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1);
+        std::printf("pix trans fmt time: %ld µs\n", time_span.count());
     });
     cli->run_recv();
     return 0;

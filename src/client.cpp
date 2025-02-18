@@ -131,7 +131,6 @@ namespace scrcpy {
                 av_packet_free(&config_packet);
                 config_packet = nullptr;
             }
-
             const auto frames = decoder.decode(packet);
             if (frames.empty()) {
                 continue;

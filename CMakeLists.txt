@@ -76,6 +76,6 @@ install(FILES
         DESTINATION lib/cmake/scrcpy++
 )
 
-install(FILES src/client.hpp
+install(FILES src/client.hpp src/decoder.hpp src/frame.hpp
         DESTINATION include/scrcpy++
 )

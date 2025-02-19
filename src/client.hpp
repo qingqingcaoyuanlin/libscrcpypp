@@ -65,7 +65,7 @@ namespace scrcpy {
                     const std::optional<std::string> &device_serial = std::nullopt) -> void;
 
     private:
-        std::string_view addr;
+        std::string addr;
         std::uint16_t port;
 
         std::string device_name{};

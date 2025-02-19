@@ -4,11 +4,11 @@
 #include <client.hpp>
 
 namespace scrcpy {
-    auto client::create_shared(const std::string &addr, std::uint16_t port) -> std::shared_ptr<client> {
+    auto client::create_shared(std::string_view addr, std::uint16_t port) -> std::shared_ptr<client> {
         return std::make_shared<client>(addr, port);
     }
 
-    client::client(std::string addr, const std::uint16_t port): addr(std::move(addr)), port(port) {
+    client::client(std::string_view addr, const std::uint16_t port) : addr(addr), port(port) {
     }
 
     client::~client() {
@@ -76,8 +76,8 @@ namespace scrcpy {
             const auto frame_header_size = this->video_socket->read_some(boost::asio::buffer(frame_header_buffer));
             if (frame_header_size != frame_header_buffer.size()) {
                 throw std::runtime_error(
-                    std::format("broken frame header, expect {:#x}. got {:#x}",
-                                frame_header_buffer.size(), frame_header_size));
+                        std::format("broken frame header, expect {:#x}. got {:#x}",
+                                    frame_header_buffer.size(), frame_header_size));
             }
             const bool config_flag = frame_header_buffer.at(0) >> 7 & 0x01;
             const bool keyframe_flag = frame_header_buffer.at(0) >> 6 & 0x01;
@@ -137,7 +137,7 @@ namespace scrcpy {
             }
 
             if (this->consumer.has_value()) {
-                for (const auto &frame : frames) {
+                for (const auto &frame: frames) {
                     this->consumer.value()(frame);
                 }
                 continue;
@@ -214,10 +214,10 @@ namespace scrcpy {
     }
 
     auto client::read_forward(
-        const std::filesystem::path &adb_bin) -> std::vector<std::array<std::string, 3> > {
+            const std::filesystem::path &adb_bin) -> std::vector<std::array<std::string, 3> > {
         using namespace boost::process;
         ipstream out_stream;
-        using std::operator""sv;
+        using std::operator ""sv;
         child list_c(std::format("{} forward --list", adb_bin.string()), std_out > out_stream);
         std::vector<std::array<std::string, 3> > forward_list;
         list_c.wait();
@@ -232,8 +232,8 @@ namespace scrcpy {
     }
 
     std::optional<std::string> client::forward_list_contains_tcp_port(
-        const std::filesystem::path &adb_bin,
-        const std::uint16_t port) {
+            const std::filesystem::path &adb_bin,
+            const std::uint16_t port) {
         for (const auto &[serial, local, remote]: read_forward(adb_bin)) {
             if (local.contains(std::format("tcp:{}", port))) {
                 return serial;
@@ -245,7 +245,7 @@ namespace scrcpy {
     auto client::list_dev_serials(const std::filesystem::path &adb_bin) -> std::vector<std::string> {
         using namespace boost::process;
         ipstream out_stream;
-        using std::operator""sv;
+        using std::operator ""sv;
         child list_c(std::format("{} devices", adb_bin.string()), std_out > out_stream);
         auto sig_start = false;
         std::vector<std::string> serials;
@@ -290,9 +290,9 @@ namespace scrcpy {
         auto upload_cmd = std::format("{} push {} /sdcard/scrcpy-server.jar", adb_exec, scrcpy_jar_bin.string());
         auto forward_cmd = std::format("{} forward tcp:{} localabstract:scrcpy", adb_exec, port);
         auto exec_cmd = std::format(
-            "{} shell CLASSPATH=/sdcard/scrcpy-server.jar app_process / com.genymobile.scrcpy.Server"
-            " {} tunnel_forward=true cleanup=true audio=false control=false",
-            adb_exec, scrcpy_server_version
+                "{} shell CLASSPATH=/sdcard/scrcpy-server.jar app_process / com.genymobile.scrcpy.Server"
+                " {} tunnel_forward=true cleanup=true audio=false control=false",
+                adb_exec, scrcpy_server_version
         );
 
         child upload_c(upload_cmd);
@@ -302,12 +302,12 @@ namespace scrcpy {
         }
 
         if (const auto existing_serial = forward_list_contains_tcp_port(adb_bin, port);
-            existing_serial.has_value()) {
+                existing_serial.has_value()) {
             if (existing_serial.value() != serial) {
                 throw std::runtime_error(
-                    std::format(
-                        "another adb device[serial={}] is forwarding on this port[{}]",
-                        existing_serial.value(), port)
+                        std::format(
+                                "another adb device[serial={}] is forwarding on this port[{}]",
+                                existing_serial.value(), port)
                 );
             }
         } else {

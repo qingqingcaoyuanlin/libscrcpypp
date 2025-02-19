@@ -21,9 +21,9 @@
 namespace scrcpy {
     class client : public std::enable_shared_from_this<client> {
     public:
-        static auto create_shared(const std::string &addr, std::uint16_t port) -> std::shared_ptr<client>;
+        static auto create_shared(std::string_view addr, std::uint16_t port) -> std::shared_ptr<client>;
 
-        client(std::string addr, std::uint16_t port);
+        client(std::string_view addr, std::uint16_t port);
 
         ~client();
 
@@ -35,7 +35,7 @@ namespace scrcpy {
 
         auto is_recv_enabled() -> bool;
 
-        auto set_frame_consumer(std::function<void(std::shared_ptr<frame>)> consumer) -> void ;
+        auto set_frame_consumer(std::function<void(std::shared_ptr<frame>)> consumer) -> void;
 
         // auto start_decode() -> void;
         //
@@ -48,7 +48,7 @@ namespace scrcpy {
         static auto read_forward(const std::filesystem::path &adb_bin) -> std::vector<std::array<std::string, 3> >;
 
         static auto forward_list_contains_tcp_port(
-            const std::filesystem::path &adb_bin, std::uint16_t port) -> std::optional<std::string>;
+                const std::filesystem::path &adb_bin, std::uint16_t port) -> std::optional<std::string>;
 
         static auto list_dev_serials(const std::filesystem::path &adb_bin) -> std::vector<std::string>;
 
@@ -65,7 +65,7 @@ namespace scrcpy {
                     const std::optional<std::string> &device_serial = std::nullopt) -> void;
 
     private:
-        std::string addr;
+        std::string_view addr;
         std::uint16_t port;
 
         std::string device_name{};

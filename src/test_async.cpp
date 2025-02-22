@@ -2,7 +2,6 @@
 // Created by ender on 25-2-17.
 //
 #include "client.cpp"
-
 int main(int argc, char *argv[]) {
     std::cout << "list of device serials:" << std::endl;
     for (const auto &s: scrcpy::client::list_dev_serials("adb")) {

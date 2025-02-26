@@ -13,7 +13,7 @@ int main(int argc, char *argv[]) {
     cli->run_recv();
     auto codec = cli->get_codec();
     auto [w, h] = cli->video_size();
-    std::printf("video size: [h:%lu,w:%lu]\n", w, h);
+    std::printf("video size: [h:%llu,w:%llu]\n", w, h);
     for (const auto &frame: cli->frames()) {
         std::printf("pixel format:%s\n", av_get_pix_fmt_name(static_cast<AVPixelFormat>(frame->raw()->format)));
         std::printf("h:%d w:%d\n", frame->raw()->height, frame->raw()->width);

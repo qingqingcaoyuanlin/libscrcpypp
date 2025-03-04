@@ -36,7 +36,7 @@ build-windows-job:
 build-docker-job:
   stage: build
   script:
-    - docker build -no-cache -t enderthecoder/libscrcpypp:latest .
+    - docker build --no-cache -t enderthecoder/libscrcpypp:latest .
   tags:
     - linux
 

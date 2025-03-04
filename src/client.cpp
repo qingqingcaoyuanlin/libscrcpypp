@@ -251,7 +251,7 @@ namespace scrcpy {
         std::vector<std::string> serials;
         list_c.wait();
         for (std::string line; out_stream && std::getline(out_stream, line) && !line.empty();) {
-            if (sig_start and line.contains("devices")) {
+            if (sig_start and line.contains("device")) {
                 for (const auto [s_begin, s_end]: std::views::split(line, "\t"sv)) {
                     auto serial = std::string_view(s_begin, s_end);
                     serials.emplace_back(serial);

@@ -24,6 +24,8 @@ namespace scrcpy {
 
         auto raw() const -> AVFrame *;
 
+        auto rgb24_frame() const -> AVFrame *;
+
         auto mat() const -> std::shared_ptr<cv::Mat>;
 
     private:

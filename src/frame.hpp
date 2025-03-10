@@ -22,10 +22,17 @@ namespace scrcpy {
 
         ~frame();
 
+        /**
+         * Get yuv420p raw ffmpeg AVFrame
+         * @return A yuv420p pix fmt AVFrame, managed by std::shared_ptr of this frame object.
+         */
         auto raw() const -> AVFrame *;
 
-        auto rgb24_frame() const -> AVFrame *;
 
+        /**
+         * Get rgb24 opencv mat.
+         * @return A OpenCV RGB24 pix fmt Mat, managed by std::shared_ptr.
+         */
         auto mat() const -> std::shared_ptr<cv::Mat>;
 
     private:

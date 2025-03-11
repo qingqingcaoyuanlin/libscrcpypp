@@ -32,7 +32,7 @@ namespace scrcpy {
                                                 static_cast<AVPixelFormat>(raw_frame->format),
                                                 w,
                                                 h,
-                                                AV_PIX_FMT_ARGB, SWS_FAST_BILINEAR, nullptr, nullptr, nullptr);
+                                                AV_PIX_FMT_RGBA, SWS_FAST_BILINEAR, nullptr, nullptr, nullptr);
         new_frame->format = AV_PIX_FMT_RGBA;
         new_frame->width = w;
         new_frame->height = h;

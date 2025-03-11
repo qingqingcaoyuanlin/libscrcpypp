@@ -44,7 +44,7 @@ namespace scrcpy {
 
         std::array<char, 1> dummy_byte_buffer = {};
         try {
-            this->video_socket->read_some(boost::asio::buffer(dummy_byte_buffer));
+            boost::asio::read(*video_socket, boost::asio::buffer(dummy_byte_buffer));
             if (dummy_byte_buffer[0] != 0x00) {
                 throw std::runtime_error(std::format("broken packet, expect 0x00 but got {:#x}.",
                                                      dummy_byte_buffer[0]));
@@ -54,11 +54,11 @@ namespace scrcpy {
             throw std::runtime_error(std::format("error reading dummy byte: {}", e.what()));
         }
         std::array<char, 64> device_name_buffer = {};
-        this->video_socket->read_some(boost::asio::buffer(device_name_buffer));
+        boost::asio::read(*video_socket, boost::asio::buffer(device_name_buffer));
         this->device_name = device_name_buffer.data();
         std::cout << "device name: " << device_name << std::endl;
         std::array<std::byte, 12> codec_meta_buffer = {};
-        this->video_socket->read_some(boost::asio::buffer(codec_meta_buffer));
+        boost::asio::read(*video_socket, boost::asio::buffer(codec_meta_buffer));
         this->codec = std::string{reinterpret_cast<char *>(codec_meta_buffer.data()), 4};
         std::reverse(codec_meta_buffer.begin() + 4, codec_meta_buffer.begin() + 8);
         std::reverse(codec_meta_buffer.begin() + 8, codec_meta_buffer.end());
@@ -76,12 +76,7 @@ namespace scrcpy {
             }
             std::array<std::uint8_t, 12> frame_header_buffer{};
 
-            const auto frame_header_size = this->video_socket->read_some(boost::asio::buffer(frame_header_buffer));
-            if (frame_header_size != frame_header_buffer.size()) {
-                throw std::runtime_error(
-                    std::format("broken frame header, expect {:#x}. got {:#x}",
-                                frame_header_buffer.size(), frame_header_size));
-            }
+            boost::asio::read(*video_socket, boost::asio::buffer(frame_header_buffer));
             const bool config_flag = frame_header_buffer.at(0) >> 7 & 0x01;
             const bool keyframe_flag = frame_header_buffer.at(0) >> 6 & 0x01;
             std::reverse(frame_header_buffer.begin(), frame_header_buffer.begin() + 8);

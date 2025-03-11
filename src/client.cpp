@@ -51,8 +51,7 @@ namespace scrcpy {
             }
             std::cout << "successfully read dummy byte." << std::endl;
         } catch (std::exception &e) {
-            std::cerr << "error reading dummy byte: " << e.what() << std::endl;
-            return;
+            throw std::runtime_error(std::format("error reading dummy byte: {}", e.what()));
         }
         std::array<char, 64> device_name_buffer = {};
         this->video_socket->read_some(boost::asio::buffer(device_name_buffer));
@@ -106,6 +105,7 @@ namespace scrcpy {
                 }
                 std::cerr << "end of video stream" << std::endl;
                 this->stop_recv();
+                this->video_socket->close();
                 if (this->consumer.has_value()) {
                     this->consumer.value()(nullptr);
                 }
@@ -270,7 +270,6 @@ namespace scrcpy {
         if (server_c.running()) {
             std::cerr << std::format("[{}]scrcpy server it already running, terminating...", serial) << std::endl;
             server_c.terminate();
-            server_c.join();
             std::cerr << std::format("[{}]scrcpy server terminated", serial) << std::endl;
         }
 
@@ -311,5 +310,39 @@ namespace scrcpy {
         }
         server_out_stream = ipstream();
         server_c = child{exec_cmd, std_out > server_out_stream};
+
+        std::string first_line;
+        bool output_received = false;
+        auto start_time = std::chrono::steady_clock::now();
+        while (true) {
+            constexpr int timeout_ms = 10000;
+            if (auto elapsed = std::chrono::steady_clock::now() - start_time;
+                std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count() > timeout_ms) {
+                server_c.terminate();
+                throw std::runtime_error("server startup timed out (10s)");
+            }
+
+            if (!server_c.running()) {
+                int exit_code = server_c.exit_code();
+                throw std::runtime_error(std::format("server process exited unexpectedly (code: {})", exit_code));
+            }
+
+            if (std::getline(server_out_stream, first_line)) {
+                if (not first_line.empty() and first_line.contains("[server]")) {
+                    output_received = true;
+                    break;
+                }
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        }
+
+        if (!output_received) {
+            server_c.terminate();
+            throw std::runtime_error("failed to get server startup confirmation");
+        }
+    }
+
+    auto client::server_alive() -> bool {
+        return this->server_c.running();
     }
 }

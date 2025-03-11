@@ -8,7 +8,7 @@ int main(int argc, char *argv[]) {
 
     const auto cli = scrcpy::client::create_shared("localhost", 1234);
     cli->deploy("adb", "scrcpy-server", "3.1", 1234);
-    std::this_thread::sleep_for(std::chrono::seconds(1)); // wait  1 sec for scrcpy server to start up
+    std::this_thread::sleep_for(std::chrono::seconds(1));
     cli->connect();
     cli->run_recv();
     auto codec = cli->get_codec();

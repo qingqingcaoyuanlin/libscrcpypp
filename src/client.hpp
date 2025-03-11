@@ -68,6 +68,8 @@ namespace scrcpy {
                     std::uint16_t port,
                     const std::optional<std::string> &device_serial = std::nullopt) -> void;
 
+        auto server_alive() -> bool;
+
     private:
         std::string addr;
         std::uint16_t port;

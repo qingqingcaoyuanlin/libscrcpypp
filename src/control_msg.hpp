@@ -4,11 +4,11 @@
 
 #ifndef CONTROL_MSG_HPP
 #define CONTROL_MSG_HPP
-#include <bitset>
 #include <cstdint>
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <array>
 
 namespace scrcpy {
     namespace pointer_id {
@@ -93,12 +93,15 @@ namespace scrcpy {
         virtual auto size() -> std::size_t = 0;
     };
 
-    class fixed_dtype : public sizable {
+    class fixed_size : public sizable {
     };
 
+    class position_t : public fixed_size, public sizable {
+    public:
+    };
 
     template<typename INT_TYPE, std::size_t BYTE_SIZE = sizeof(INT_TYPE)>
-    class abs_int_t : public dtype, public fixed_dtype {
+    class abs_int_t : public dtype, public fixed_size {
         static_assert(std::is_integral_v<INT_TYPE>);
 
     public:
@@ -129,7 +132,7 @@ namespace scrcpy {
     };
 
     template<typename FLOAT_TYPE, std::size_t BYTE_SIZE = sizeof(FLOAT_TYPE)>
-    class abs_float_t final : public dtype, public fixed_dtype {
+    class abs_float_t final : public dtype, public fixed_size {
         static_assert(std::is_floating_point_v<FLOAT_TYPE>);
 
     public:
@@ -175,7 +178,7 @@ namespace scrcpy {
 
         virtual auto serialize() -> std::vector<std::uint8_t>;
 
-        virtual auto join_buf(const std::vector<std::byte>& buf) -> void;
+        virtual auto join_buf(const std::vector<std::byte> &buf) -> void;
 
         virtual auto init_buf() -> std::vector<std::byte>;
 
@@ -189,13 +192,13 @@ namespace scrcpy {
 
         auto serialize() -> std::vector<std::uint8_t> override;
 
-        std::optional<abs_enum_t<control_msg_type>> msg_type;
-        std::optional<abs_enum_t<android_keyevent_action>> action;
-        std::optional<abs_int_t<std::uint64_t>> pointer_id;
+        std::optional<abs_enum_t<control_msg_type> > msg_type;
+        std::optional<abs_enum_t<android_keyevent_action> > action;
+        std::optional<abs_int_t<std::uint64_t> > pointer_id;
         // position position;
-        std::optional<abs_float_t<float>> pressure;
-        std::optional<abs_int_t<std::int32_t>> action_button;
-        std::optional<abs_int_t<std::int32_t>> buttons;
+        std::optional<abs_float_t<float> > pressure;
+        std::optional<abs_int_t<std::int32_t> > action_button;
+        std::optional<abs_int_t<std::int32_t> > buttons;
     };
 }
 

@@ -95,7 +95,7 @@ namespace scrcpy {
             if (av_new_packet(packet, static_cast<std::int32_t>(packet_size))) {
                 throw std::runtime_error("failed to allocate packet memory: ");
             }
-            const auto frame_size = this->video_socket->read_some(boost::asio::buffer(packet->data, packet_size));
+            const auto frame_size = boost::asio::read(*this->video_socket, boost::asio::buffer(packet->data, packet_size));
             packet->size = static_cast<std::int32_t>(packet_size);
 
             if (frame_size != packet_size) {

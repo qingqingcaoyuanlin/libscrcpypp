@@ -35,10 +35,10 @@ namespace scrcpy {
         auto raw() const -> AVFrame *;
 
         /**
-         * Make a new frame obj and convert its pixel format to ARGB.
-         * @return A new ARGB frame obj.
+         * Make a new frame obj and convert its pixel format to BGRA. This method is provided for render usages.
+         * @return A new BGRA frame obj.
          */
-        auto to_rgba() const -> std::shared_ptr<frame>;
+        auto to_bgra() const -> std::shared_ptr<frame>;
 
         /**
          * Get rgb24 opencv mat.

@@ -24,7 +24,7 @@ namespace scrcpy {
         return this->raw_frame;
     }
 
-    auto frame::to_rgba() const -> std::shared_ptr<frame> {
+    auto frame::to_bgra() const -> std::shared_ptr<frame> {
         auto new_frame = av_frame_alloc();
         const auto w = this->raw_frame->width;
         const auto h = this->raw_frame->height;
@@ -32,8 +32,8 @@ namespace scrcpy {
                                                 static_cast<AVPixelFormat>(raw_frame->format),
                                                 w,
                                                 h,
-                                                AV_PIX_FMT_RGBA, SWS_FAST_BILINEAR, nullptr, nullptr, nullptr);
-        new_frame->format = AV_PIX_FMT_RGBA;
+                                                AV_PIX_FMT_BGRA, SWS_FAST_BILINEAR, nullptr, nullptr, nullptr);
+        new_frame->format = AV_PIX_FMT_BGRA;
         new_frame->width = w;
         new_frame->height = h;
         if (av_frame_get_buffer(new_frame, 32) < 0) {

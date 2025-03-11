@@ -23,11 +23,22 @@ namespace scrcpy {
         ~frame();
 
         /**
-         * Get yuv420p raw ffmpeg AVFrame
+         * Get frame pixel format.
+         * @return A ffmpeg AVPixelFormat enum represents its internal raw frame format.
+         */
+        auto pix_fmt() const -> AVPixelFormat;
+
+        /**
+         * Get yuv420p raw ffmpeg AVFrame.
          * @return A yuv420p pix fmt AVFrame, managed by std::shared_ptr of this frame object.
          */
         auto raw() const -> AVFrame *;
 
+        /**
+         * Make a new frame obj and convert its pixel format to ARGB.
+         * @return A new ARGB frame obj.
+         */
+        auto to_rgba() const -> std::shared_ptr<frame>;
 
         /**
          * Get rgb24 opencv mat.

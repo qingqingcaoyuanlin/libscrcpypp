@@ -27,6 +27,10 @@ namespace scrcpy {
 
         ~client();
 
+        auto get_port() const -> std::uint16_t;
+
+        auto get_addr() const -> std::string_view;
+
         auto connect() -> void;
 
         auto start_recv() -> void;
@@ -48,7 +52,7 @@ namespace scrcpy {
         static auto read_forward(const std::filesystem::path &adb_bin) -> std::vector<std::array<std::string, 3> >;
 
         static auto forward_list_contains_tcp_port(
-                const std::filesystem::path &adb_bin, std::uint16_t port) -> std::optional<std::string>;
+            const std::filesystem::path &adb_bin, std::uint16_t port) -> std::optional<std::string>;
 
         static auto list_dev_serials(const std::filesystem::path &adb_bin) -> std::vector<std::string>;
 

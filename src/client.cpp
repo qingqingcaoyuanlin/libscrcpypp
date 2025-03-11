@@ -8,7 +8,7 @@ namespace scrcpy {
         return std::make_shared<client>(addr, port);
     }
 
-    client::client(std::string_view addr, const std::uint16_t port) : addr(addr), port(port) {
+    client::client(const std::string_view addr, const std::uint16_t port) : addr(addr), port(port) {
     }
 
     client::~client() {
@@ -27,6 +27,10 @@ namespace scrcpy {
             server_c.wait();
         }
     }
+
+    auto client::get_port() const -> std::uint16_t { return port; }
+
+    auto client::get_addr() const -> std::string_view { return addr; }
 
     auto client::connect() -> void {
         using boost::asio::ip::tcp;
@@ -172,36 +176,6 @@ namespace scrcpy {
         this->consumer = consumer;
     }
 
-    // auto client::start_decode() -> void {
-    //     parse_enabled = true;
-    //     std::thread t([this] {
-    //         while (true) {
-    //             if (not parse_enabled) {
-    //                 break;
-    //             }
-    //             std::unique_lock lock(raw_mutex);
-    //             decode_cv.wait(lock, [this] {
-    //                 return !raw_queue.empty();
-    //             });
-    //             std::vector<std::byte> decode_buffer;
-    //             decode_buffer.insert(decode_buffer.end(), raw_queue.begin(), raw_queue.end());
-    //             raw_queue.clear();
-    //             lock.unlock();
-    //             const auto frames = decoder.decode(std::span{decode_buffer});
-    //             if (frames.empty()) {
-    //                 continue;
-    //             }
-    //             std::lock_guard guard(frame_mutex);
-    //             frame_queue.insert(frame_queue.end(), frames.begin(), frames.end());
-    //         }
-    //     });
-    //     t.detach();
-    // }
-    //
-    // auto client::stop_decode() -> void {
-    //     parse_enabled = false;
-    // }
-
     auto client::frames() -> std::vector<std::shared_ptr<frame> > {
         frame_mutex.lock();
         if (frame_queue.empty()) {
@@ -296,6 +270,7 @@ namespace scrcpy {
         if (server_c.running()) {
             std::cerr << std::format("[{}]scrcpy server it already running, terminating...", serial) << std::endl;
             server_c.terminate();
+            server_c.join();
             std::cerr << std::format("[{}]scrcpy server terminated", serial) << std::endl;
         }
 
@@ -323,13 +298,18 @@ namespace scrcpy {
                 );
             }
         } else {
-            child forward_c(forward_cmd);
+            ipstream out_stream;
+            child forward_c(forward_cmd, std_out > out_stream);
             forward_c.wait();
             if (forward_c.exit_code() != 0) {
-                throw std::runtime_error("error forwarding scrcpy to local tcp port");
+                std::string cause;
+                for (std::string line; out_stream && std::getline(out_stream, line) && !line.empty();) {
+                    cause += line;
+                }
+                throw std::runtime_error(std::format("error forwarding scrcpy to local tcp port: {}", cause));
             }
         }
-
+        server_out_stream = ipstream();
         server_c = child{exec_cmd, std_out > server_out_stream};
     }
 }

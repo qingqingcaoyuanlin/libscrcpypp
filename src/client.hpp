@@ -19,6 +19,8 @@
 #include "frame.hpp"
 
 namespace scrcpy {
+
+
     class client : public std::enable_shared_from_this<client> {
     public:
         static auto create_shared(std::string_view addr, std::uint16_t port) -> std::shared_ptr<client>;
@@ -40,10 +42,6 @@ namespace scrcpy {
         auto is_recv_enabled() -> bool;
 
         auto set_frame_consumer(std::function<void(std::shared_ptr<frame>)> consumer) -> void;
-
-        // auto start_decode() -> void;
-        //
-        // auto stop_decode() -> void;
 
         auto frames() -> std::vector<std::shared_ptr<frame> >;
 
@@ -90,15 +88,12 @@ namespace scrcpy {
         std::shared_ptr<boost::asio::ip::tcp::socket> video_socket;
         std::shared_ptr<boost::asio::io_context> io_context;
 
-        // std::mutex raw_mutex;
         std::mutex frame_mutex;
 
-        // std::condition_variable decode_cv;
-
-        // std::deque<std::byte> raw_queue;
         std::deque<std::shared_ptr<frame> > frame_queue;
 
         h264_decoder decoder;
+
         AVPacket *config_packet = nullptr;
 
         std::optional<std::function<void(std::shared_ptr<frame>)> > consumer;

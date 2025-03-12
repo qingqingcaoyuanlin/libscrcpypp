@@ -367,10 +367,11 @@ namespace scrcpy {
         return dbg_logs;
     }
 
-    auto client::touch(const std::int32_t x, const std::int32_t y, const android_keyevent_action action) const -> void {
+    auto client::touch(const std::int32_t x, const std::int32_t y, const android_keyevent_action action,
+                       const std::uint64_t pointer_id) const -> void {
         auto mouse_msg = std::make_unique<scrcpy::mouse_msg>();
         mouse_msg->action = abs_enum_t{action};
-        mouse_msg->pointer_id = abs_int_t{UINT64_C(0x1234567887654321)};
+        mouse_msg->pointer_id = abs_int_t{pointer_id};
         auto position = position_t(x, y, this->width, this->height);
         mouse_msg->position = position;
         mouse_msg->pressure = u16fp{1.0f};

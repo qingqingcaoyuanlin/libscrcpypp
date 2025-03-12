@@ -81,7 +81,7 @@ namespace scrcpy {
         virtual ~dtype() = default;
 
         /**
-         * data -> bytes
+         * data to bytes in big-endian
          * @return byte sequence
          */
         virtual auto serialize() -> std::vector<std::byte> = 0;

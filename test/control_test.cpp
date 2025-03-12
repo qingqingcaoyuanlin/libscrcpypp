@@ -28,6 +28,7 @@ auto main() -> int {
     cli->connect();
     while (true) {
         cli->click(100, 200);
+        std::this_thread::sleep_for(std::chrono::seconds(1));
     }
     std::this_thread::sleep_for(std::chrono::seconds(1));
     cli->terminate();

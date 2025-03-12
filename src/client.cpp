@@ -39,8 +39,12 @@ namespace scrcpy {
         tcp::resolver resolver(*io_context);
         const auto endpoints = resolver.resolve(addr, std::to_string(port));
 
+
         this->video_socket = std::make_shared<tcp::socket>(*io_context);
         boost::asio::connect(*this->video_socket, endpoints);
+
+        this->control_socket = std::make_shared<tcp::socket>(*io_context);
+        boost::asio::connect(*this->control_socket, endpoints);
 
         std::array<char, 1> dummy_byte_buffer = {};
         try {
@@ -66,6 +70,7 @@ namespace scrcpy {
         this->height = *reinterpret_cast<std::uint32_t *>(codec_meta_buffer.data() + 8);\
         std::cout << "video stream codec: " << this->codec << std::endl;
         std::cout << "video stream working at resolution: " << this->height << "x" << this->width << std::endl;
+
     }
 
     auto client::run_recv() -> void {
@@ -276,7 +281,7 @@ namespace scrcpy {
         auto forward_cmd = std::format("{} forward tcp:{} localabstract:scrcpy", adb_exec, port);
         auto exec_cmd = std::format(
             "{} shell CLASSPATH=/sdcard/scrcpy-server.jar app_process / com.genymobile.scrcpy.Server"
-            " {} tunnel_forward=true cleanup=true audio=false control=true {}",
+            " {} tunnel_forward=true cleanup=true video=true audio=false control=true {}",
             adb_exec, scrcpy_server_version, param_max_size
         );
 

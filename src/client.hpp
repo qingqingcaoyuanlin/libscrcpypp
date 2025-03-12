@@ -87,6 +87,8 @@ namespace scrcpy {
         std::atomic<bool> parse_enabled{false};
 
         std::shared_ptr<boost::asio::ip::tcp::socket> video_socket;
+        std::shared_ptr<boost::asio::ip::tcp::socket> control_socket;
+
         std::shared_ptr<boost::asio::io_context> io_context;
 
         std::mutex frame_mutex;

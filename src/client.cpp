@@ -374,7 +374,7 @@ namespace scrcpy {
         mouse_msg->pointer_id = abs_int_t{pointer_id};
         auto position = position_t(x, y, this->width, this->height);
         mouse_msg->position = position;
-        mouse_msg->pressure = u16fp{1};
+        mouse_msg->pressure = ufp16_t{1};
         mouse_msg->action_button = abs_enum_t<android_motionevent_buttons, std::uint32_t>{
             android_motionevent_buttons::AMOTION_EVENT_BUTTON_PRIMARY
         };

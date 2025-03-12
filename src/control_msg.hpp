@@ -158,9 +158,9 @@ namespace scrcpy {
         FLOAT_TYPE value{0.0};
     };
 
-    class u16fp final : public abs_int_t<std::uint16_t> {
+    class ufp16_t final : public abs_int_t<std::uint16_t> {
     public:
-        explicit u16fp(std::float16_t value)
+        explicit ufp16_t(std::float16_t value)
             : abs_int_t(float_to_u16fp(value)) {
         }
 
@@ -240,7 +240,7 @@ namespace scrcpy {
         std::optional<abs_enum_t<android_keyevent_action> > action;
         std::optional<abs_int_t<std::uint64_t> > pointer_id;
         std::optional<position_t> position;
-        std::optional<u16fp> pressure;
+        std::optional<ufp16_t> pressure;
         std::optional<abs_enum_t<android_motionevent_buttons, std::uint32_t> > action_button;
         std::optional<abs_enum_t<android_motionevent_buttons, std::uint32_t> > buttons;
     };

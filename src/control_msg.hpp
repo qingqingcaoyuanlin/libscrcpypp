@@ -173,7 +173,7 @@ namespace scrcpy {
 
         [[nodiscard]] virtual auto buf_size() const -> std::size_t = 0;
 
-        virtual auto serialize() -> std::vector<std::uint8_t> = 0;
+        virtual auto serialize() -> std::vector<std::byte> = 0;
 
         virtual auto join_buf(const std::vector<std::byte> &buf) -> void;
 
@@ -205,7 +205,7 @@ namespace scrcpy {
     public:
         [[nodiscard]] auto buf_size() const -> std::size_t override;
 
-        auto serialize() -> std::vector<std::uint8_t> override;
+        auto serialize() -> std::vector<std::byte> override;
 
         std::optional<abs_enum_t<control_msg_type> > msg_type =
                 abs_enum_t{control_msg_type::SC_CONTROL_MSG_TYPE_INJECT_TOUCH_EVENT};

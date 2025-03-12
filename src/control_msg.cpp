@@ -9,7 +9,7 @@ namespace scrcpy {
     }
 
     auto control_msg::join_buf(const std::vector<std::byte> &buf) -> void {
-        std::copy_n(buf.data(), buf.size(), buf_it);
+        std::copy_n(buf.begin(), buf.size(), buf_it);
         buf_it += static_cast<std::int64_t>(buf.size());
     }
 
@@ -44,9 +44,8 @@ namespace scrcpy {
         return 32;
     }
 
-    std::vector<std::uint8_t> mouse_msg::serialize() {
-        std::vector<std::uint8_t> buf;
-        buf.resize(buf_size());
+    std::vector<std::byte> mouse_msg::serialize() {
+        auto buf = this->init_buf();
         this->join_buf(msg_type.value().serialize());
         this->join_buf(action.value().serialize());
         this->join_buf(pointer_id.value().serialize());

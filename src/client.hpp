@@ -64,7 +64,8 @@ namespace scrcpy {
                     const std::filesystem::path &scrcpy_jar_bin,
                     const std::string &scrcpy_server_version,
                     std::uint16_t port,
-                    const std::optional<std::string> &device_serial = std::nullopt) -> void;
+                    const std::optional<std::string> &device_serial = std::nullopt,
+                    const std::optional<std::uint16_t> &max_size = std::nullopt) -> void;
 
         auto server_alive() -> bool;
 

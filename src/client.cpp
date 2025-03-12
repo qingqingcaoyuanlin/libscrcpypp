@@ -90,7 +90,8 @@ namespace scrcpy {
             if (av_new_packet(packet, static_cast<std::int32_t>(packet_size))) {
                 throw std::runtime_error("failed to allocate packet memory: ");
             }
-            const auto frame_size = boost::asio::read(*this->video_socket, boost::asio::buffer(packet->data, packet_size));
+            const auto frame_size = boost::asio::read(*this->video_socket,
+                                                      boost::asio::buffer(packet->data, packet_size));
             packet->size = static_cast<std::int32_t>(packet_size);
 
             if (frame_size != packet_size) {
@@ -241,7 +242,8 @@ namespace scrcpy {
     auto client::deploy(const std::filesystem::path &adb_bin,
                         const std::filesystem::path &scrcpy_jar_bin,
                         const std::string &scrcpy_server_version, const std::uint16_t port,
-                        const std::optional<std::string> &device_serial) -> void {
+                        const std::optional<std::string> &device_serial,
+                        const std::optional<std::uint16_t> &max_size) -> void {
         //adb shell CLASSPATH=/sdcard/scrcpy-server.jar app_process / com.genymobile.scrcpy.Server 3.1 tunnel_forward=true cleanup=false audio=false control=false max_size=1920
         using namespace boost::process;
         auto adb_exec = adb_bin.string();
@@ -268,12 +270,14 @@ namespace scrcpy {
             std::cerr << std::format("[{}]scrcpy server terminated", serial) << std::endl;
         }
 
+        auto param_max_size = max_size.has_value() ? std::format("max_size={}", max_size.value()) : "";
+
         auto upload_cmd = std::format("{} push {} /sdcard/scrcpy-server.jar", adb_exec, scrcpy_jar_bin.string());
         auto forward_cmd = std::format("{} forward tcp:{} localabstract:scrcpy", adb_exec, port);
         auto exec_cmd = std::format(
             "{} shell CLASSPATH=/sdcard/scrcpy-server.jar app_process / com.genymobile.scrcpy.Server"
-            " {} tunnel_forward=true cleanup=true audio=false control=false",
-            adb_exec, scrcpy_server_version
+            " {} tunnel_forward=true cleanup=true audio=false control=true {}",
+            adb_exec, scrcpy_server_version, param_max_size
         );
 
         child upload_c(upload_cmd);

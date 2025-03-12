@@ -83,6 +83,6 @@ install(FILES
         DESTINATION lib/cmake/scrcpy++
 )
 
-install(FILES src/client.hpp src/decoder.hpp src/frame.hpp src/control_msg.cpp
+install(FILES src/client.hpp src/decoder.hpp src/frame.hpp src/control_msg.hpp
         DESTINATION include/scrcpy++
 )

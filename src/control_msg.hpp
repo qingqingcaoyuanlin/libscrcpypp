@@ -9,8 +9,7 @@
 #include <vector>
 #include <algorithm>
 #include <array>
-#include <stdfloat>
-#include <boost/asio/detail/socket_ops.hpp>
+#include <boost/asio.hpp>
 
 namespace scrcpy {
     namespace pointer_id {
@@ -160,11 +159,11 @@ namespace scrcpy {
 
     class ufp16_t final : public abs_int_t<std::uint16_t> {
     public:
-        explicit ufp16_t(std::float16_t value)
+        explicit ufp16_t(const float value)
             : abs_int_t(float_to_u16fp(value)) {
         }
 
-        static uint16_t float_to_u16fp(const std::float16_t f) {
+        static uint16_t float_to_u16fp(const float f) {
             if (not(f >= 0.0f && f <= 1.0f)) throw std::invalid_argument("invalid floating point value");
             uint32_t u = f * 0x1p16f;
             if (u >= 0xffff) {

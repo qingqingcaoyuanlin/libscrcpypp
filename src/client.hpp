@@ -66,13 +66,15 @@ namespace scrcpy {
                     const std::optional<std::string> &device_serial = std::nullopt,
                     const std::optional<std::uint16_t> &max_size = std::nullopt) -> void;
 
+        auto terminate() -> void;
+
         auto server_alive() -> bool;
 
         auto send_control_msg(const std::shared_ptr<control_msg> &msg) const -> void;
 
         auto get_server_dbg_logs() -> std::vector<std::string>;
 
-        auto touch() -> void;
+        auto touch(std::int32_t x, std::int32_t y) const -> void;
 
         auto expand_notification_panel() const -> void;
 
@@ -84,11 +86,10 @@ namespace scrcpy {
 
         auto open_head_keyboard_settings() const -> void;
 
-        auto reset_video() const;
+        auto reset_video() const -> void;
 
     private:
-
-        auto send_single_byte_control_msg(control_msg_type msg_type) const ->void;
+        auto send_single_byte_control_msg(control_msg_type msg_type) const -> void;
 
         std::string addr;
         std::uint16_t port;

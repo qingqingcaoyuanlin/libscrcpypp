@@ -60,12 +60,13 @@ namespace scrcpy {
 
     std::vector<std::byte> mouse_msg::serialize() {
         auto buf = this->init_buf();
-        this->join_buf(msg_type.value().serialize());
-        this->join_buf(action.value().serialize());
-        this->join_buf(pointer_id.value().serialize());
-        this->join_buf(pressure.value().serialize());
-        this->join_buf(action_button.value().serialize());
-        this->join_buf(buttons.value().serialize());
+        this->join_buf(msg_type->serialize());
+        this->join_buf(action->serialize());
+        this->join_buf(pointer_id->serialize());
+        this->join_buf(position->serialize());
+        this->join_buf(pressure->serialize());
+        this->join_buf(action_button->serialize());
+        this->join_buf(buttons->serialize());
         return buf;
     }
 }

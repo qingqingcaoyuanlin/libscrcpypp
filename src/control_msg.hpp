@@ -9,6 +9,7 @@
 #include <vector>
 #include <algorithm>
 #include <array>
+#include <stdfloat>
 #include <boost/asio/detail/socket_ops.hpp>
 
 namespace scrcpy {
@@ -62,7 +63,6 @@ namespace scrcpy {
     };
 
     enum class android_motionevent_buttons {
-        AMOTION_EVENT_BUTTON_NONE = 0,
         /** primary */
         AMOTION_EVENT_BUTTON_PRIMARY = 1 << 0,
         /** secondary */
@@ -131,8 +131,6 @@ namespace scrcpy {
 
     template<typename FLOAT_TYPE, std::size_t BYTE_SIZE = sizeof(FLOAT_TYPE)>
     class abs_float_t final : public dtype, public fixed_size {
-        static_assert(std::is_floating_point_v<FLOAT_TYPE>);
-
     public:
         explicit abs_float_t(const FLOAT_TYPE value) : value(value) {
         }
@@ -160,11 +158,28 @@ namespace scrcpy {
         FLOAT_TYPE value{0.0};
     };
 
-    template<typename ENUM_TYPE>
-    class abs_enum_t final : public abs_int_t<std::uint8_t> {
+    class u16fp final : public abs_int_t<std::uint16_t> {
+    public:
+        explicit u16fp(std::float16_t value)
+            : abs_int_t(float_to_u16fp(value)) {
+        }
+
+        static uint16_t float_to_u16fp(const std::float16_t f) {
+            if (not(f >= 0.0f && f <= 1.0f)) throw std::invalid_argument("invalid floating point value");
+            uint32_t u = f * 0x1p16f;
+            if (u >= 0xffff) {
+                if (u != 0x10000) throw std::invalid_argument("float bit error");
+                u = 0xffff;
+            }
+            return static_cast<uint16_t>(u);
+        }
+    };
+
+    template<typename ENUM_TYPE, typename BASE_INT_TYPE=std::uint8_t, std::size_t BYTE_SIZE = sizeof(BASE_INT_TYPE)>
+    class abs_enum_t final : public abs_int_t<BASE_INT_TYPE, BYTE_SIZE> {
     public:
         explicit abs_enum_t(ENUM_TYPE value)
-            : abs_int_t(static_cast<std::uint8_t>(value)) {
+            : abs_int_t<BASE_INT_TYPE, BYTE_SIZE>(static_cast<BASE_INT_TYPE>(value)) {
         }
     };
 
@@ -186,7 +201,6 @@ namespace scrcpy {
 
     class single_byte_msg final : public control_msg {
     public:
-
         explicit single_byte_msg(control_msg_type type);
 
         [[nodiscard]] auto buf_size() const -> std::size_t override;
@@ -226,9 +240,9 @@ namespace scrcpy {
         std::optional<abs_enum_t<android_keyevent_action> > action;
         std::optional<abs_int_t<std::uint64_t> > pointer_id;
         std::optional<position_t> position;
-        std::optional<abs_float_t<float> > pressure;
-        std::optional<abs_enum_t<android_motionevent_buttons> > action_button;
-        std::optional<abs_enum_t<android_motionevent_buttons> > buttons;
+        std::optional<u16fp> pressure;
+        std::optional<abs_enum_t<android_motionevent_buttons, std::uint32_t> > action_button;
+        std::optional<abs_enum_t<android_motionevent_buttons, std::uint32_t> > buttons;
     };
 }
 

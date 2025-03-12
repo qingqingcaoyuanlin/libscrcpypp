@@ -345,12 +345,17 @@ namespace scrcpy {
         }
     }
 
+    auto client::terminate() -> void {
+        this->server_c.terminate();
+    }
+
     auto client::server_alive() -> bool {
         return this->server_c.running();
     }
 
     auto client::send_control_msg(const std::shared_ptr<control_msg> &msg) const -> void {
-        this->control_socket->send(boost::asio::buffer(msg->serialize(), msg->buf_size()));
+        auto buffer = msg->serialize();
+        this->control_socket->send(boost::asio::buffer(buffer, buffer.size()));
     }
 
     auto client::get_server_dbg_logs() -> std::vector<std::string> {
@@ -360,6 +365,22 @@ namespace scrcpy {
             dbg_logs.push_back(line);
         }
         return dbg_logs;
+    }
+
+    auto client::touch(std::int32_t x, std::int32_t y) const -> void {
+        auto mouse_msg = std::make_unique<scrcpy::mouse_msg>();
+        mouse_msg->action = abs_enum_t{android_keyevent_action::AKEY_EVENT_ACTION_DOWN};
+        mouse_msg->pointer_id = abs_int_t{UINT64_C(0x1234567887654321)};
+        auto position = position_t(x, y, this->width, this->height);
+        mouse_msg->position = position;
+        mouse_msg->pressure = u16fp{1.0f};
+        mouse_msg->action_button = abs_enum_t<android_motionevent_buttons, std::uint32_t>{
+            android_motionevent_buttons::AMOTION_EVENT_BUTTON_PRIMARY
+        };
+        mouse_msg->buttons = abs_enum_t<android_motionevent_buttons, std::uint32_t>{
+            android_motionevent_buttons::AMOTION_EVENT_BUTTON_PRIMARY
+        };
+        this->send_control_msg(std::move(mouse_msg));
     }
 
     auto client::expand_notification_panel() const -> void {
@@ -382,7 +403,7 @@ namespace scrcpy {
         this->send_single_byte_control_msg(control_msg_type::SC_CONTROL_MSG_TYPE_OPEN_HARD_KEYBOARD_SETTINGS);
     }
 
-    auto client::reset_video() const {
+    auto client::reset_video() const -> void {
         this->send_single_byte_control_msg(control_msg_type::SC_CONTROL_MSG_TYPE_RESET_VIDEO);
     }
 

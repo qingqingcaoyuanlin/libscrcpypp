@@ -96,10 +96,6 @@ namespace scrcpy {
     class fixed_size : public sizable {
     };
 
-    class position_t : public fixed_size, public sizable {
-    public:
-    };
-
     template<typename INT_TYPE, std::size_t BYTE_SIZE = sizeof(INT_TYPE)>
     class abs_int_t : public dtype, public fixed_size {
         static_assert(std::is_integral_v<INT_TYPE>);
@@ -186,6 +182,24 @@ namespace scrcpy {
         std::vector<std::byte>::iterator buf_it;
     };
 
+    class position_t final : public fixed_size, public dtype {
+    public:
+        position_t(std::int32_t x, std::int32_t y, std::uint16_t width, std::uint16_t height);
+
+        ~position_t() override;
+
+        auto size() -> std::size_t override;
+
+        auto serialize() -> std::vector<std::byte> override;
+
+    private:
+        abs_int_t<std::int32_t> x;
+        abs_int_t<std::int32_t> y;
+
+        abs_int_t<std::uint16_t> width;
+        abs_int_t<std::uint16_t> height;
+    };
+
     class mouse_msg final : public control_msg {
     public:
         [[nodiscard]] auto buf_size() const -> std::size_t override;
@@ -195,7 +209,7 @@ namespace scrcpy {
         std::optional<abs_enum_t<control_msg_type> > msg_type;
         std::optional<abs_enum_t<android_keyevent_action> > action;
         std::optional<abs_int_t<std::uint64_t> > pointer_id;
-        // position position;
+        std::optional<position_t> position;
         std::optional<abs_float_t<float> > pressure;
         std::optional<abs_int_t<std::int32_t> > action_button;
         std::optional<abs_int_t<std::int32_t> > buttons;

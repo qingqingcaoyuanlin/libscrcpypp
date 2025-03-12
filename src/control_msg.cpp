@@ -5,6 +5,9 @@
 #include "control_msg.hpp"
 
 namespace scrcpy {
+    control_msg::~control_msg() {
+    }
+
     auto control_msg::join_buf(const std::vector<std::byte> &buf) -> void {
         std::copy_n(buf.data(), buf.size(), buf_it);
         buf_it += static_cast<std::int64_t>(buf.size());

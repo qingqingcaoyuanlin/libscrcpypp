@@ -61,6 +61,7 @@ namespace scrcpy {
     };
 
     enum class android_motionevent_buttons {
+        AMOTION_EVENT_BUTTON_NONE = 0,
         /** primary */
         AMOTION_EVENT_BUTTON_PRIMARY = 1 << 0,
         /** secondary */
@@ -159,20 +160,20 @@ namespace scrcpy {
     };
 
     template<typename ENUM_TYPE>
-    class abs_enum_t final : public abs_int_t<std::uint8_t, 1> {
+    class abs_enum_t final : public abs_int_t<std::uint8_t> {
     public:
         explicit abs_enum_t(ENUM_TYPE value)
-            : abs_int_t(value) {
+            : abs_int_t(static_cast<std::uint8_t>(value)) {
         }
     };
 
     class control_msg {
     public:
-        virtual ~control_msg() = default;
+        virtual ~control_msg() = 0;
 
-        [[nodiscard]] virtual auto buf_size() const -> std::size_t;
+        [[nodiscard]] virtual auto buf_size() const -> std::size_t = 0;
 
-        virtual auto serialize() -> std::vector<std::uint8_t>;
+        virtual auto serialize() -> std::vector<std::uint8_t> = 0;
 
         virtual auto join_buf(const std::vector<std::byte> &buf) -> void;
 
@@ -206,13 +207,14 @@ namespace scrcpy {
 
         auto serialize() -> std::vector<std::uint8_t> override;
 
-        std::optional<abs_enum_t<control_msg_type> > msg_type;
+        std::optional<abs_enum_t<control_msg_type> > msg_type =
+                abs_enum_t{control_msg_type::SC_CONTROL_MSG_TYPE_INJECT_TOUCH_EVENT};
         std::optional<abs_enum_t<android_keyevent_action> > action;
         std::optional<abs_int_t<std::uint64_t> > pointer_id;
         std::optional<position_t> position;
         std::optional<abs_float_t<float> > pressure;
-        std::optional<abs_int_t<std::int32_t> > action_button;
-        std::optional<abs_int_t<std::int32_t> > buttons;
+        std::optional<abs_enum_t<android_motionevent_buttons> > action_button;
+        std::optional<abs_enum_t<android_motionevent_buttons> > buttons;
     };
 }
 

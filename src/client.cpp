@@ -349,4 +349,8 @@ namespace scrcpy {
     auto client::server_alive() -> bool {
         return this->server_c.running();
     }
+
+    auto client::send_control_msg(const std::shared_ptr<control_msg> &msg) const -> void {
+        this->control_socket->send(boost::asio::buffer(msg->serialize()));
+    }
 }

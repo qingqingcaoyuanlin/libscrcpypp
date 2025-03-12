@@ -11,6 +11,7 @@
 #include <filesystem>
 #include <ranges>
 #include <bitset>
+#include <control_msg.hpp>
 
 #include <boost/asio.hpp>
 #include <boost/process.hpp>
@@ -19,8 +20,6 @@
 #include "frame.hpp"
 
 namespace scrcpy {
-
-
     class client : public std::enable_shared_from_this<client> {
     public:
         static auto create_shared(std::string_view addr, std::uint16_t port) -> std::shared_ptr<client>;
@@ -68,6 +67,8 @@ namespace scrcpy {
                     const std::optional<std::uint16_t> &max_size = std::nullopt) -> void;
 
         auto server_alive() -> bool;
+
+        auto send_control_msg(const std::shared_ptr<control_msg> &msg) const -> void;
 
     private:
         std::string addr;

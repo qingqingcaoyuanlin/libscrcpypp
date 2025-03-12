@@ -15,7 +15,7 @@ int main(int argc, char *argv[]) {
     auto codec = cli->get_codec();
     auto [w, h] = cli->video_size();
     std::printf("video size: [h:%lu,w:%lu]\n", w, h);
-    cli->set_frame_consumer([&cli](const auto &frame) {
+    cli->set_frame_consumer([](const auto &frame) {
         if (frame == nullptr) {
             return;
         }

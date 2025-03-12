@@ -19,6 +19,20 @@ namespace scrcpy {
         return buf;
     }
 
+    single_byte_msg::single_byte_msg(const control_msg_type type) {
+        this->msg_type = abs_enum_t{type};
+    }
+
+    auto single_byte_msg::buf_size() const -> std::size_t {
+        return 1;
+    }
+
+    auto single_byte_msg::serialize() -> std::vector<std::byte> {
+        auto buf = this->init_buf();
+        this->join_buf(this->msg_type->serialize());
+        return buf;
+    }
+
     position_t::position_t(const std::int32_t x, const std::int32_t y, const std::uint16_t width,
                            const std::uint16_t height)
         : x(x), y(y), width(width), height(height) {

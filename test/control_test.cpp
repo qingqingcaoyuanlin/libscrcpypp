@@ -26,14 +26,18 @@ auto main() -> int {
     cli->deploy("adb", "scrcpy-server", "3.1", 1234, std::nullopt, 720);
     std::this_thread::sleep_for(std::chrono::seconds(1));
     cli->connect();
-    auto msg = std::make_shared<mouse_msg>();
-    msg->action = abs_enum_t{android_keyevent_action::AKEY_EVENT_ACTION_DOWN};
-    msg->pointer_id = abs_int_t{pointer_id::MOUSE};
-    auto position = position_t(200, 200, 720, 336);
-    msg->position = position;
-    msg->pressure = abs_float_t{1.0f};
-    msg->action_button = abs_enum_t{android_motionevent_buttons::AMOTION_EVENT_BUTTON_NONE};
-    msg->buttons = abs_enum_t{android_motionevent_buttons::AMOTION_EVENT_BUTTON_NONE};
-    cli->send_control_msg(msg);
+    auto msg = std::make_unique<single_byte_msg>(control_msg_type::SC_CONTROL_MSG_TYPE_EXPAND_SETTINGS_PANEL);
+    cli->send_control_msg(std::move(msg));
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+    auto dbg_logs = cli->get_server_dbg_logs();
+    // auto msg = std::make_shared<mouse_msg>();
+    // msg->action = abs_enum_t{android_keyevent_action::AKEY_EVENT_ACTION_DOWN};
+    // msg->pointer_id = abs_int_t{pointer_id::MOUSE};
+    // auto position = position_t(200, 200, 720, 336);
+    // msg->position = position;
+    // msg->pressure = abs_float_t{1.0f};
+    // msg->action_button = abs_enum_t{android_motionevent_buttons::AMOTION_EVENT_BUTTON_NONE};
+    // msg->buttons = abs_enum_t{android_motionevent_buttons::AMOTION_EVENT_BUTTON_NONE};
+    // cli->send_control_msg(msg);
     return 0;
 }

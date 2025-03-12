@@ -70,7 +70,6 @@ namespace scrcpy {
         this->height = *reinterpret_cast<std::uint32_t *>(codec_meta_buffer.data() + 8);\
         std::cout << "video stream codec: " << this->codec << std::endl;
         std::cout << "video stream working at resolution: " << this->height << "x" << this->width << std::endl;
-
     }
 
     auto client::run_recv() -> void {
@@ -351,6 +350,15 @@ namespace scrcpy {
     }
 
     auto client::send_control_msg(const std::shared_ptr<control_msg> &msg) const -> void {
-        this->control_socket->send(boost::asio::buffer(msg->serialize()));
+        this->control_socket->send(boost::asio::buffer(msg->serialize(), msg->buf_size()));
+    }
+
+    auto client::get_server_dbg_logs() -> std::vector<std::string> {
+        std::vector<std::string> dbg_logs;
+        for (std::string line; this->server_out_stream && std::getline(this->server_out_stream, line) && !line.empty()
+             ;) {
+            dbg_logs.push_back(line);
+        }
+        return dbg_logs;
     }
 }

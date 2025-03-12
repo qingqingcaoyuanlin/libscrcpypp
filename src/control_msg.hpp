@@ -9,6 +9,7 @@
 #include <vector>
 #include <algorithm>
 #include <array>
+#include <boost/asio/detail/socket_ops.hpp>
 
 namespace scrcpy {
     namespace pointer_id {
@@ -181,6 +182,19 @@ namespace scrcpy {
 
     private:
         std::vector<std::byte>::iterator buf_it;
+    };
+
+    class single_byte_msg final : public control_msg {
+    public:
+
+        explicit single_byte_msg(control_msg_type type);
+
+        [[nodiscard]] auto buf_size() const -> std::size_t override;
+
+        auto serialize() -> std::vector<std::byte> override;
+
+    private:
+        std::optional<abs_enum_t<control_msg_type> > msg_type;
     };
 
     class position_t final : public fixed_size, public dtype {

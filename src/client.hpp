@@ -70,6 +70,8 @@ namespace scrcpy {
 
         auto send_control_msg(const std::shared_ptr<control_msg> &msg) const -> void;
 
+        auto get_server_dbg_logs() -> std::vector<std::string>;
+
     private:
         std::string addr;
         std::uint16_t port;

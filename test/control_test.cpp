@@ -28,6 +28,15 @@ auto main() -> int {
     cli->connect();
     auto rotate_msg = std::make_unique<single_byte_msg>(control_msg_type::SC_CONTROL_MSG_TYPE_EXPAND_NOTIFICATION_PANEL);
     cli->send_control_msg(std::move(rotate_msg));
+    auto mouse_msg = std::make_unique<scrcpy::mouse_msg>();
+    mouse_msg->action = abs_enum_t{android_keyevent_action::AKEY_EVENT_ACTION_DOWN};
+    mouse_msg->pointer_id = abs_int_t{pointer_id::GENERIC_FINGER};
+    auto position = position_t(200, 200, 720, 336);
+    mouse_msg->position = position;
+    mouse_msg->pressure = abs_float_t{1.0f};
+    mouse_msg->action_button = abs_enum_t{android_motionevent_buttons::AMOTION_EVENT_BUTTON_NONE};
+    mouse_msg->buttons = abs_enum_t{android_motionevent_buttons::AMOTION_EVENT_BUTTON_NONE};
+    cli->send_control_msg(std::move(mouse_msg));
     std::this_thread::sleep_for(std::chrono::seconds(1));
     return 0;
 }

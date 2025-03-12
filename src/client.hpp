@@ -72,7 +72,24 @@ namespace scrcpy {
 
         auto get_server_dbg_logs() -> std::vector<std::string>;
 
+        auto touch() -> void;
+
+        auto expand_notification_panel() const -> void;
+
+        auto expand_settings_panel() const -> void;
+
+        auto collapse_panels() const -> void;
+
+        auto rotate_device() const -> void;
+
+        auto open_head_keyboard_settings() const -> void;
+
+        auto reset_video() const;
+
     private:
+
+        auto send_single_byte_control_msg(control_msg_type msg_type) const ->void;
+
         std::string addr;
         std::uint16_t port;
 

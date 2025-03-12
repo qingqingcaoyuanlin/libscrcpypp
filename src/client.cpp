@@ -361,4 +361,32 @@ namespace scrcpy {
         }
         return dbg_logs;
     }
+
+    auto client::expand_notification_panel() const -> void {
+        this->send_single_byte_control_msg(control_msg_type::SC_CONTROL_MSG_TYPE_EXPAND_NOTIFICATION_PANEL);
+    }
+
+    auto client::expand_settings_panel() const -> void {
+        this->send_single_byte_control_msg(control_msg_type::SC_CONTROL_MSG_TYPE_EXPAND_SETTINGS_PANEL);
+    }
+
+    auto client::collapse_panels() const -> void {
+        this->send_single_byte_control_msg(control_msg_type::SC_CONTROL_MSG_TYPE_COLLAPSE_PANELS);
+    }
+
+    auto client::rotate_device() const -> void {
+        this->send_single_byte_control_msg(control_msg_type::SC_CONTROL_MSG_TYPE_ROTATE_DEVICE);
+    }
+
+    auto client::open_head_keyboard_settings() const -> void {
+        this->send_single_byte_control_msg(control_msg_type::SC_CONTROL_MSG_TYPE_OPEN_HARD_KEYBOARD_SETTINGS);
+    }
+
+    auto client::reset_video() const {
+        this->send_single_byte_control_msg(control_msg_type::SC_CONTROL_MSG_TYPE_RESET_VIDEO);
+    }
+
+    auto client::send_single_byte_control_msg(control_msg_type msg_type) const -> void {
+        this->send_control_msg(std::make_unique<single_byte_msg>(msg_type));
+    }
 }

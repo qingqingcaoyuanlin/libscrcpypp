@@ -21,17 +21,13 @@
 
 #include <client.hpp>
 using namespace scrcpy;
+
 auto main() -> int {
     const auto cli = client::create_shared("localhost", 1234);
     cli->deploy("adb", "scrcpy-server", "3.1", 1234, std::nullopt, 1920);
     std::this_thread::sleep_for(std::chrono::seconds(1));
     cli->connect();
-    while (true) {
-        cli->click(100, 200);
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-    }
+    cli->click(100, 200);
     std::this_thread::sleep_for(std::chrono::seconds(1));
-    cli->terminate();
-    auto logs = cli->get_server_dbg_logs();
     return 0;
 }

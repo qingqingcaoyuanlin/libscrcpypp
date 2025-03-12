@@ -384,9 +384,9 @@ namespace scrcpy {
         this->send_control_msg(std::move(mouse_msg));
     }
 
-    auto client::click(const std::int32_t x, const std::int32_t y) const -> void {
-        this->touch(x, y, android_keyevent_action::AKEY_EVENT_ACTION_DOWN);
-        this->touch(x, y, android_keyevent_action::AKEY_EVENT_ACTION_UP);
+    auto client::click(const std::int32_t x, const std::int32_t y, const std::uint64_t pointer_id) const -> void {
+        this->touch(x, y, android_keyevent_action::AKEY_EVENT_ACTION_DOWN, pointer_id);
+        this->touch(x, y, android_keyevent_action::AKEY_EVENT_ACTION_UP, pointer_id);
     }
 
     auto client::expand_notification_panel() const -> void {

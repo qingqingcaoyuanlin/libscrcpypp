@@ -74,9 +74,10 @@ namespace scrcpy {
 
         auto get_server_dbg_logs() -> std::vector<std::string>;
 
-        auto touch(std::int32_t x, std::int32_t y, android_keyevent_action, std::uint64_t pointer_id = pointer_id::GENERIC_FINGER) const -> void;
+        auto touch(std::int32_t x, std::int32_t y, android_keyevent_action,
+                   std::uint64_t pointer_id = pointer_id::GENERIC_FINGER) const -> void;
 
-        auto click(std::int32_t x, std::int32_t y) const -> void;
+        auto click(std::int32_t x, std::int32_t y, std::uint64_t pointer_id = pointer_id::GENERIC_FINGER) const -> void;
 
         auto expand_notification_panel() const -> void;
 

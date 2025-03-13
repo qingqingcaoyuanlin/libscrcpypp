@@ -397,6 +397,10 @@ namespace scrcpy {
         this->touch(x, y, android_motionevent_action::AMOTION_EVENT_ACTION_MOVE, pointer_id);
     }
 
+    auto client::hover_pointer(const std::int32_t x, const std::int32_t y, const std::uint64_t pointer_id) const -> void {
+        this->touch(x, y, android_motionevent_action::AMOTION_EVENT_ACTION_HOVER_MOVE, pointer_id);
+    }
+
     auto client::slide(std::tuple<std::int32_t, std::int32_t> begin, std::tuple<std::int32_t, std::int32_t> end,
                        const std::uint64_t pointer_id, std::chrono::milliseconds duration) -> void {
         auto &[x0, y0] = begin;

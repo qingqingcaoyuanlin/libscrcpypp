@@ -53,20 +53,6 @@ namespace scrcpy {
         return buf;
     }
 
-    auto string_t::serialize() -> std::vector<std::byte> {
-        std::vector<std::byte> buf;
-        buf.resize(this->size());
-        auto str_len = abs_int_t{static_cast<std::uint32_t>(this->value.size())};
-        std::copy_n(str_len.serialize().begin(), 4, buf.begin());
-        std::copy_n(reinterpret_cast<const std::byte *>(this->value.c_str()), this->value.size(),
-                    buf.begin() + str_len.size());
-        return buf;
-    }
-
-    auto string_t::size() const -> std::size_t {
-        return this->value.size() + 4;
-    }
-
     std::size_t touch_msg::buf_size() const {
         return 32;
     }

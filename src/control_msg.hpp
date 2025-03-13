@@ -172,6 +172,9 @@ namespace scrcpy {
         static_assert(std::is_integral_v<INT_TYPE>);
 
     public:
+        typedef INT_TYPE value_type;
+        static constexpr std::size_t value_size = BYTE_SIZE;
+
         explicit abs_int_t(const INT_TYPE value) : value(value) {
         }
 
@@ -298,21 +301,31 @@ namespace scrcpy {
         abs_int_t<std::uint16_t> height;
     };
 
+    template<typename size_type=abs_int_t<std::int32_t> >
     class string_t final : public dtype, public var_size {
     public:
-        explicit string_t(const std::string &value) : value(value) {
-            if (this->value.size() > MAX_STRING_SIZE) {
+        explicit string_t(const std::string &value, const std::size_t max_string_size = 256) : value(value) {
+            if (this->value.size() > max_string_size) {
                 throw std::out_of_range(
-                    std::format("string value too long: {}/{}", this->value.size(), MAX_STRING_SIZE));
+                    std::format("string value too long: {}/{}", this->value.size(), max_string_size));
             }
         }
 
-        auto serialize() -> std::vector<std::byte> override;
+        auto serialize() -> std::vector<std::byte> override {
+            std::vector<std::byte> buf;
+            buf.resize(this->size());
+            auto str_len = size_type{static_cast<typename size_type::value_type>(this->value.size())};
+            std::copy_n(str_len.serialize().begin(), str_len.size(), buf.begin());
+            std::copy_n(reinterpret_cast<const std::byte *>(this->value.c_str()), this->value.size(),
+                        buf.begin() + str_len.size());
+            return buf;
+        }
 
-        auto size() const -> std::size_t override;
+        auto size() const -> std::size_t override {
+            return this->value.size() + size_type::value_size;
+        }
 
     private:
-        static constexpr int MAX_STRING_SIZE = 300;
         std::string value;
     };
 
@@ -344,7 +357,7 @@ namespace scrcpy {
         std::optional<abs_enum_t<control_msg_type> > msg_type = abs_enum_t{
             control_msg_type::SC_CONTROL_MSG_TYPE_INJECT_TEXT
         };
-        std::optional<string_t> text;
+        std::optional<string_t<> > text;
     };
 }
 

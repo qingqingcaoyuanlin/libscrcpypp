@@ -427,7 +427,7 @@ namespace scrcpy {
 
     auto client::text(const std::string &text) const -> void {
         auto msg = std::make_unique<text_msg>();
-        msg->text = string_t{text};
+        msg->text = string_t{text, 300};
         this->send_control_msg(std::move(msg));
     }
 

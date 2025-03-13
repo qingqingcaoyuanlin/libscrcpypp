@@ -27,8 +27,8 @@ auto main() -> int {
     cli->deploy("adb", "scrcpy-server", "3.1", 1234, std::nullopt, 1920);
     std::this_thread::sleep_for(std::chrono::seconds(1));
     cli->connect();
-    // cli->click(100, 200);
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+    cli->click(100, 200);
     cli->text("hello, world!");
+    std::this_thread::sleep_for(std::chrono::seconds(1));
     return 0;
 }

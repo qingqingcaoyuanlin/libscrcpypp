@@ -91,7 +91,7 @@ namespace scrcpy {
     public:
         virtual ~sizable() = default;
 
-        virtual auto size() -> std::size_t = 0;
+        virtual auto size() const -> std::size_t = 0;
     };
 
     class fixed_size : public sizable {
@@ -119,7 +119,7 @@ namespace scrcpy {
             return buffer;
         }
 
-        auto size() -> std::size_t override {
+        auto size() const -> std::size_t override {
             return BYTE_SIZE;
         }
 
@@ -148,7 +148,7 @@ namespace scrcpy {
             return buffer;
         }
 
-        auto size() -> std::size_t override {
+        auto size() const -> std::size_t override {
             return BYTE_SIZE;
         }
 
@@ -219,7 +219,7 @@ namespace scrcpy {
 
         ~position_t() override;
 
-        auto size() -> std::size_t override;
+        auto size() const -> std::size_t override;
 
         auto serialize() -> std::vector<std::byte> override;
 
@@ -239,9 +239,10 @@ namespace scrcpy {
                     std::format("string value too long: {}/{}", this->value.size(), MAX_STRING_SIZE));
             }
         }
+
         auto serialize() -> std::vector<std::byte> override;
 
-        auto size() -> std::size_t override;
+        auto size() const -> std::size_t override;
 
     private:
         static constexpr int MAX_STRING_SIZE = 300;
@@ -264,14 +265,18 @@ namespace scrcpy {
         std::optional<abs_enum_t<android_motionevent_buttons, std::uint32_t> > buttons;
     };
 
-    class text_msg final : public single_byte_msg {
+    class text_msg final : public control_msg {
     public:
-        explicit text_msg()
-            : single_byte_msg(control_msg_type::SC_CONTROL_MSG_TYPE_INJECT_TEXT) {
+        explicit text_msg() {
         }
 
         auto serialize() -> std::vector<std::byte> override;
 
+        [[nodiscard]] auto buf_size() const -> std::size_t override;
+
+        std::optional<abs_enum_t<control_msg_type> > msg_type = abs_enum_t{
+            control_msg_type::SC_CONTROL_MSG_TYPE_INJECT_TEXT
+        };
         std::optional<string_t> text;
     };
 }

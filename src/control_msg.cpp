@@ -39,7 +39,7 @@ namespace scrcpy {
 
     position_t::~position_t() = default;
 
-    auto position_t::size() -> std::size_t {
+    auto position_t::size() const -> std::size_t {
         return 12;
     }
 
@@ -63,7 +63,7 @@ namespace scrcpy {
         return buf;
     }
 
-    auto string_t::size() -> std::size_t {
+    auto string_t::size() const -> std::size_t {
         return this->value.size() + 4;
     }
 
@@ -84,9 +84,13 @@ namespace scrcpy {
     }
 
     std::vector<std::byte> text_msg::serialize() {
-        auto buf = single_byte_msg::serialize();
-        buf.resize(buf.size() + this->text->size());
-        std::copy_n(this->text->serialize().begin(), this->text->size(), buf.end());
+        auto buf = this->init_buf();
+        this->join_buf(msg_type->serialize());
+        this->join_buf(text->serialize());
         return buf;
+    }
+
+    auto text_msg::buf_size() const -> std::size_t {
+        return this->msg_type->size() + this->text->size();
     }
 }

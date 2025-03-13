@@ -367,26 +367,26 @@ namespace scrcpy {
         return dbg_logs;
     }
 
-    auto client::touch(const std::int32_t x, const std::int32_t y, const android_keyevent_action action,
+    auto client::touch(const std::int32_t x, const std::int32_t y, const android_motionevent_action action,
                        const std::uint64_t pointer_id) const -> void {
-        auto mouse_msg = std::make_unique<scrcpy::touch_msg>();
-        mouse_msg->action = abs_enum_t{action};
-        mouse_msg->pointer_id = abs_int_t{pointer_id};
+        auto msg = std::make_unique<touch_msg>();
+        msg->action = abs_enum_t{action};
+        msg->pointer_id = abs_int_t{pointer_id};
         auto position = position_t(x, y, this->width, this->height);
-        mouse_msg->position = position;
-        mouse_msg->pressure = ufp16_t{1};
-        mouse_msg->action_button = abs_enum_t<android_motionevent_buttons, std::uint32_t>{
+        msg->position = position;
+        msg->pressure = ufp16_t{1};
+        msg->action_button = abs_enum_t<android_motionevent_buttons, std::uint32_t>{
             android_motionevent_buttons::AMOTION_EVENT_BUTTON_PRIMARY
         };
-        mouse_msg->buttons = abs_enum_t<android_motionevent_buttons, std::uint32_t>{
+        msg->buttons = abs_enum_t<android_motionevent_buttons, std::uint32_t>{
             android_motionevent_buttons::AMOTION_EVENT_BUTTON_PRIMARY
         };
-        this->send_control_msg(std::move(mouse_msg));
+        this->send_control_msg(std::move(msg));
     }
 
     auto client::click(const std::int32_t x, const std::int32_t y, const std::uint64_t pointer_id) const -> void {
-        this->touch(x, y, android_keyevent_action::AKEY_EVENT_ACTION_DOWN, pointer_id);
-        this->touch(x, y, android_keyevent_action::AKEY_EVENT_ACTION_UP, pointer_id);
+        this->touch(x, y, android_motionevent_action::AMOTION_EVENT_ACTION_DOWN, pointer_id);
+        this->touch(x, y, android_motionevent_action::AMOTION_EVENT_ACTION_UP, pointer_id);
     }
 
     auto client::text(const std::string &text) const -> void {

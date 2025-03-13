@@ -27,6 +27,7 @@ auto main() -> int {
     cli->deploy("adb", "scrcpy-server", "3.1", 1234, std::nullopt, 1920);
     std::this_thread::sleep_for(std::chrono::seconds(1));
     cli->connect();
+    cli->start_app("com.baidu.BaiduMap");
     cli->click(100, 200);
     cli->text("hello, world!");
     cli->slide(std::make_tuple(100, 100), std::make_tuple(800, 800));

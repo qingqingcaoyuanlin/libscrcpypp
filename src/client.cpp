@@ -455,6 +455,12 @@ namespace scrcpy {
         this->send_single_byte_control_msg(control_msg_type::SC_CONTROL_MSG_TYPE_RESET_VIDEO);
     }
 
+    auto client::start_app(const std::string &app_name) const -> void {
+        auto msg = std::make_unique<start_app_msg>();
+        msg->app_name = string_t<abs_int_t<std::uint8_t>>{app_name};
+        this->send_control_msg(std::move(msg));
+    }
+
     auto client::send_single_byte_control_msg(control_msg_type msg_type) const -> void {
         this->send_control_msg(std::make_unique<single_byte_msg>(msg_type));
     }

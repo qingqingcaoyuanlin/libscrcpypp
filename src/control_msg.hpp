@@ -359,6 +359,18 @@ namespace scrcpy {
         };
         std::optional<string_t<> > text;
     };
+
+    class start_app_msg final : public control_msg {
+    public:
+        [[nodiscard]] auto buf_size() const -> std::size_t override;
+
+        auto serialize() -> std::vector<std::byte> override;
+
+        std::optional<abs_enum_t<control_msg_type> > msg_type = abs_enum_t{
+            control_msg_type::SC_CONTROL_MSG_TYPE_START_APP
+        };
+        std::optional<string_t<abs_int_t<std::uint8_t> > > app_name;
+    };
 }
 
 

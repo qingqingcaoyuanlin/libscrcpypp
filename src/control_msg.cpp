@@ -79,4 +79,15 @@ namespace scrcpy {
     auto text_msg::buf_size() const -> std::size_t {
         return this->msg_type->size() + this->text->size();
     }
+
+    auto start_app_msg::buf_size() const -> std::size_t {
+        return this->msg_type->size() + this->app_name->size();
+    }
+
+    auto start_app_msg::serialize() -> std::vector<std::byte> {
+        auto buf = this->init_buf();
+        this->join_buf(msg_type->serialize());
+        this->join_buf(app_name->serialize());
+        return buf;
+    }
 }

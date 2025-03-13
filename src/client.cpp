@@ -384,6 +384,38 @@ namespace scrcpy {
         this->send_control_msg(std::move(msg));
     }
 
+    auto client::down_pointer(const std::int32_t x, const std::int32_t y,
+                              const std::uint64_t pointer_id) const -> void {
+        this->touch(x, y, android_motionevent_action::AMOTION_EVENT_ACTION_DOWN, pointer_id);
+    }
+
+    auto client::up_pointer(const std::int32_t x, const std::int32_t y, const std::uint64_t pointer_id) const -> void {
+        this->touch(x, y, android_motionevent_action::AMOTION_EVENT_ACTION_UP, pointer_id);
+    }
+
+    void client::move_pointer(const std::int32_t x, const std::int32_t y, const std::uint64_t pointer_id) const {
+        this->touch(x, y, android_motionevent_action::AMOTION_EVENT_ACTION_MOVE, pointer_id);
+    }
+
+    auto client::slide(std::tuple<std::int32_t, std::int32_t> begin, std::tuple<std::int32_t, std::int32_t> end,
+                       const std::uint64_t pointer_id, std::chrono::milliseconds duration) -> void {
+        auto &[x0, y0] = begin;
+        auto &[x1, y1] = end;
+
+        auto x_diff = x1 - x0;
+        auto y_diff = y1 - y0;
+        auto abs_step = std::min(std::abs(x_diff), abs(y_diff));
+        auto x_step = x_diff / abs_step;
+        auto y_step = y_diff / abs_step;
+
+        this->down_pointer(x0, y0, pointer_id);
+        for (auto i = 0; i < abs_step; i++) {
+            this->move_pointer(x0 + i * x_step, y0 + i * y_step, pointer_id);
+            std::this_thread::sleep_for(duration / abs_step);
+        }
+        this->up_pointer(x1, y1, pointer_id);
+    }
+
     auto client::click(const std::int32_t x, const std::int32_t y, const std::uint64_t pointer_id) const -> void {
         this->touch(x, y, android_motionevent_action::AMOTION_EVENT_ACTION_DOWN, pointer_id);
         this->touch(x, y, android_motionevent_action::AMOTION_EVENT_ACTION_UP, pointer_id);

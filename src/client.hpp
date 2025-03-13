@@ -77,6 +77,19 @@ namespace scrcpy {
         auto touch(std::int32_t x, std::int32_t y, android_motionevent_action,
                    std::uint64_t pointer_id = pointer_id::GENERIC_FINGER) const -> void;
 
+        auto down_pointer(std::int32_t x, std::int32_t y,
+                          std::uint64_t pointer_id = pointer_id::GENERIC_FINGER) const -> void;
+
+        auto up_pointer(std::int32_t x, std::int32_t y,
+                        std::uint64_t pointer_id = pointer_id::GENERIC_FINGER) const -> void;
+
+        auto move_pointer(std::int32_t x, std::int32_t y,
+                          std::uint64_t pointer_id = pointer_id::GENERIC_FINGER) const -> void;
+
+        auto slide(std::tuple<std::int32_t, std::int32_t> begin, std::tuple<std::int32_t, std::int32_t> end,
+                   std::uint64_t pointer_id = pointer_id::GENERIC_FINGER,
+                   std::chrono::milliseconds duration = std::chrono::milliseconds(200)) -> void;
+
         auto click(std::int32_t x, std::int32_t y, std::uint64_t pointer_id = pointer_id::GENERIC_FINGER) const -> void;
 
         auto text(const std::string &text) const -> void;

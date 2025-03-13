@@ -29,6 +29,8 @@ auto main() -> int {
     cli->connect();
     cli->click(100, 200);
     cli->text("hello, world!");
+    cli->slide(std::make_tuple(100, 100), std::make_tuple(800, 800));
+    cli->slide(std::make_tuple(100, 800), std::make_tuple(800, 100));
     std::this_thread::sleep_for(std::chrono::seconds(1));
     return 0;
 }

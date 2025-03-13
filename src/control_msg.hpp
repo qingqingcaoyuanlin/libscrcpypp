@@ -97,6 +97,9 @@ namespace scrcpy {
     class fixed_size : public sizable {
     };
 
+    class var_size : public sizable {
+    };
+
     template<typename INT_TYPE, std::size_t BYTE_SIZE = sizeof(INT_TYPE)>
     class abs_int_t : public dtype, public fixed_size {
         static_assert(std::is_integral_v<INT_TYPE>);
@@ -198,7 +201,7 @@ namespace scrcpy {
         std::vector<std::byte>::iterator buf_it;
     };
 
-    class single_byte_msg final : public control_msg {
+    class single_byte_msg : public control_msg {
     public:
         explicit single_byte_msg(control_msg_type type);
 
@@ -228,7 +231,24 @@ namespace scrcpy {
         abs_int_t<std::uint16_t> height;
     };
 
-    class mouse_msg final : public control_msg {
+    class string_t final : public dtype, public var_size {
+    public:
+        explicit string_t(const std::string &value) : value(value) {
+            if (this->value.size() > MAX_STRING_SIZE) {
+                throw std::out_of_range(
+                    std::format("string value too long: {}/{}", this->value.size(), MAX_STRING_SIZE));
+            }
+        }
+        auto serialize() -> std::vector<std::byte> override;
+
+        auto size() -> std::size_t override;
+
+    private:
+        static constexpr int MAX_STRING_SIZE = 300;
+        std::string value;
+    };
+
+    class touch_msg final : public control_msg {
     public:
         [[nodiscard]] auto buf_size() const -> std::size_t override;
 
@@ -242,6 +262,17 @@ namespace scrcpy {
         std::optional<ufp16_t> pressure;
         std::optional<abs_enum_t<android_motionevent_buttons, std::uint32_t> > action_button;
         std::optional<abs_enum_t<android_motionevent_buttons, std::uint32_t> > buttons;
+    };
+
+    class text_msg final : public single_byte_msg {
+    public:
+        explicit text_msg()
+            : single_byte_msg(control_msg_type::SC_CONTROL_MSG_TYPE_INJECT_TEXT) {
+        }
+
+        auto serialize() -> std::vector<std::byte> override;
+
+        std::optional<string_t> text;
     };
 }
 

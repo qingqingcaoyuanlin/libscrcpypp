@@ -79,6 +79,8 @@ namespace scrcpy {
 
         auto click(std::int32_t x, std::int32_t y, std::uint64_t pointer_id = pointer_id::GENERIC_FINGER) const -> void;
 
+        auto text(const std::string &text) const -> void;
+
         auto expand_notification_panel() const -> void;
 
         auto expand_settings_panel() const -> void;

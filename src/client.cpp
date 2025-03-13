@@ -369,7 +369,7 @@ namespace scrcpy {
 
     auto client::touch(const std::int32_t x, const std::int32_t y, const android_keyevent_action action,
                        const std::uint64_t pointer_id) const -> void {
-        auto mouse_msg = std::make_unique<scrcpy::mouse_msg>();
+        auto mouse_msg = std::make_unique<scrcpy::touch_msg>();
         mouse_msg->action = abs_enum_t{action};
         mouse_msg->pointer_id = abs_int_t{pointer_id};
         auto position = position_t(x, y, this->width, this->height);
@@ -387,6 +387,12 @@ namespace scrcpy {
     auto client::click(const std::int32_t x, const std::int32_t y, const std::uint64_t pointer_id) const -> void {
         this->touch(x, y, android_keyevent_action::AKEY_EVENT_ACTION_DOWN, pointer_id);
         this->touch(x, y, android_keyevent_action::AKEY_EVENT_ACTION_UP, pointer_id);
+    }
+
+    auto client::text(const std::string &text) const -> void {
+        auto msg = std::make_unique<text_msg>();
+        msg->text = string_t{text};
+        this->send_control_msg(std::move(msg));
     }
 
     auto client::expand_notification_panel() const -> void {

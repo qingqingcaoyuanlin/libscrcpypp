@@ -5,8 +5,7 @@
 #include "control_msg.hpp"
 
 namespace scrcpy {
-    control_msg::~control_msg() {
-    }
+    control_msg::~control_msg() = default;
 
     auto control_msg::join_buf(const std::vector<std::byte> &buf) -> void {
         std::copy_n(buf.begin(), buf.size(), buf_it);
@@ -54,11 +53,25 @@ namespace scrcpy {
         return buf;
     }
 
-    std::size_t mouse_msg::buf_size() const {
+    auto string_t::serialize() -> std::vector<std::byte> {
+        std::vector<std::byte> buf;
+        buf.resize(this->size());
+        auto str_len = abs_int_t{static_cast<std::uint32_t>(this->value.size())};
+        std::copy_n(str_len.serialize().begin(), 4, buf.begin());
+        std::copy_n(reinterpret_cast<const std::byte *>(this->value.c_str()), this->value.size(),
+                    buf.begin() + str_len.size());
+        return buf;
+    }
+
+    auto string_t::size() -> std::size_t {
+        return this->value.size() + 4;
+    }
+
+    std::size_t touch_msg::buf_size() const {
         return 32;
     }
 
-    std::vector<std::byte> mouse_msg::serialize() {
+    std::vector<std::byte> touch_msg::serialize() {
         auto buf = this->init_buf();
         this->join_buf(msg_type->serialize());
         this->join_buf(action->serialize());
@@ -67,6 +80,13 @@ namespace scrcpy {
         this->join_buf(pressure->serialize());
         this->join_buf(action_button->serialize());
         this->join_buf(buttons->serialize());
+        return buf;
+    }
+
+    std::vector<std::byte> text_msg::serialize() {
+        auto buf = single_byte_msg::serialize();
+        buf.resize(buf.size() + this->text->size());
+        std::copy_n(this->text->serialize().begin(), this->text->size(), buf.end());
         return buf;
     }
 }

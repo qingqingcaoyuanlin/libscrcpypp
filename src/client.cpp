@@ -73,83 +73,88 @@ namespace scrcpy {
     }
 
     auto client::run_recv() -> void {
-        recv_enabled = true;
-        while (true) {
-            if (not recv_enabled) {
-                break;
-            }
-            std::array<std::uint8_t, 12> frame_header_buffer{};
-
-            boost::asio::read(*video_socket, boost::asio::buffer(frame_header_buffer));
-            const bool config_flag = frame_header_buffer.at(0) >> 7 & 0x01;
-            const bool keyframe_flag = frame_header_buffer.at(0) >> 6 & 0x01;
-            std::reverse(frame_header_buffer.begin(), frame_header_buffer.begin() + 8);
-            frame_header_buffer.at(7) <<= 2;
-            const auto pts = *reinterpret_cast<std::uint64_t *>(frame_header_buffer.data());
-            std::reverse(frame_header_buffer.begin() + 8, frame_header_buffer.end());
-            const auto packet_size = *reinterpret_cast<std::uint32_t *>(frame_header_buffer.data() + 8);
-
-
-            AVPacket *packet = av_packet_alloc();
-            if (av_new_packet(packet, static_cast<std::int32_t>(packet_size))) {
-                throw std::runtime_error("failed to allocate packet memory: ");
-            }
-            const auto frame_size = boost::asio::read(*this->video_socket,
-                                                      boost::asio::buffer(packet->data, packet_size));
-            packet->size = static_cast<std::int32_t>(packet_size);
-
-            if (frame_size != packet_size) {
-                av_packet_free(&packet);
-                if (this->config_packet != nullptr) {
-                    av_packet_free(&this->config_packet);
+        try {
+            recv_enabled = true;
+            while (true) {
+                if (not recv_enabled) {
+                    break;
                 }
-                std::cerr << "end of video stream" << std::endl;
-                this->stop_recv();
-                this->video_socket->close();
+                std::array<std::uint8_t, 12> frame_header_buffer{};
+
+                boost::asio::read(*video_socket, boost::asio::buffer(frame_header_buffer));
+                const bool config_flag = frame_header_buffer.at(0) >> 7 & 0x01;
+                const bool keyframe_flag = frame_header_buffer.at(0) >> 6 & 0x01;
+                std::reverse(frame_header_buffer.begin(), frame_header_buffer.begin() + 8);
+                frame_header_buffer.at(7) <<= 2;
+                const auto pts = *reinterpret_cast<std::uint64_t *>(frame_header_buffer.data());
+                std::reverse(frame_header_buffer.begin() + 8, frame_header_buffer.end());
+                const auto packet_size = *reinterpret_cast<std::uint32_t *>(frame_header_buffer.data() + 8);
+
+
+                AVPacket *packet = av_packet_alloc();
+                if (av_new_packet(packet, static_cast<std::int32_t>(packet_size))) {
+                    throw std::runtime_error("failed to allocate packet memory: ");
+                }
+                const auto frame_size = boost::asio::read(*this->video_socket,
+                                                          boost::asio::buffer(packet->data, packet_size));
+                packet->size = static_cast<std::int32_t>(packet_size);
+
+                if (frame_size != packet_size) {
+                    av_packet_free(&packet);
+                    if (this->config_packet != nullptr) {
+                        av_packet_free(&this->config_packet);
+                    }
+                    std::cerr << "end of video stream" << std::endl;
+                    this->stop_recv();
+                    this->video_socket->close();
+                    if (this->consumer.has_value()) {
+                        this->consumer.value()(nullptr);
+                    }
+                    return;
+                }
+
+                if (config_flag) {
+                    packet->pts = AV_NOPTS_VALUE;
+                } else {
+                    packet->pts = static_cast<std::int64_t>(pts);
+                }
+
+                if (keyframe_flag) {
+                    packet->flags |= AV_PKT_FLAG_KEY;
+                }
+
+                packet->dts = packet->pts;
+                if (config_flag) {
+                    config_packet = packet;
+                } else if (config_packet != nullptr) {
+                    if (av_grow_packet(packet, config_packet->size)) {
+                        throw std::runtime_error("failed to grow packet");
+                    }
+                    memmove(packet->data + config_packet->size, packet->data, packet->size);
+                    memcpy(packet->data, config_packet->data, config_packet->size);
+                    // packet->size += config_packet->size;
+                    av_packet_free(&config_packet);
+                    config_packet = nullptr;
+                }
+                const auto frames = decoder.decode(packet);
+                if (frames.empty()) {
+                    continue;
+                }
+
                 if (this->consumer.has_value()) {
-                    this->consumer.value()(nullptr);
+                    for (const auto &frame: frames) {
+                        this->consumer.value()(frame);
+                    }
+                    continue;
                 }
-                return;
-            }
 
-            if (config_flag) {
-                packet->pts = AV_NOPTS_VALUE;
-            } else {
-                packet->pts = static_cast<std::int64_t>(pts);
+                frame_mutex.lock();
+                frame_queue.insert(frame_queue.end(), frames.begin(), frames.end());
+                frame_mutex.unlock();
             }
-
-            if (keyframe_flag) {
-                packet->flags |= AV_PKT_FLAG_KEY;
-            }
-
-            packet->dts = packet->pts;
-            if (config_flag) {
-                config_packet = packet;
-            } else if (config_packet != nullptr) {
-                if (av_grow_packet(packet, config_packet->size)) {
-                    throw std::runtime_error("failed to grow packet");
-                }
-                memmove(packet->data + config_packet->size, packet->data, packet->size);
-                memcpy(packet->data, config_packet->data, config_packet->size);
-                // packet->size += config_packet->size;
-                av_packet_free(&config_packet);
-                config_packet = nullptr;
-            }
-            const auto frames = decoder.decode(packet);
-            if (frames.empty()) {
-                continue;
-            }
-
-            if (this->consumer.has_value()) {
-                for (const auto &frame: frames) {
-                    this->consumer.value()(frame);
-                }
-                continue;
-            }
-
-            frame_mutex.lock();
-            frame_queue.insert(frame_queue.end(), frames.begin(), frames.end());
-            frame_mutex.unlock();
+        } catch (std::exception &) {
+            this->recv_enabled = false;
+            throw;
         }
     }
 
@@ -397,7 +402,8 @@ namespace scrcpy {
         this->touch(x, y, android_motionevent_action::AMOTION_EVENT_ACTION_MOVE, pointer_id);
     }
 
-    auto client::hover_pointer(const std::int32_t x, const std::int32_t y, const std::uint64_t pointer_id) const -> void {
+    auto client::hover_pointer(const std::int32_t x, const std::int32_t y,
+                               const std::uint64_t pointer_id) const -> void {
         this->touch(x, y, android_motionevent_action::AMOTION_EVENT_ACTION_HOVER_MOVE, pointer_id);
     }
 
@@ -457,7 +463,7 @@ namespace scrcpy {
 
     auto client::start_app(const std::string &app_name) const -> void {
         auto msg = std::make_unique<start_app_msg>();
-        msg->app_name = string_t<abs_int_t<std::uint8_t>>{app_name};
+        msg->app_name = string_t<abs_int_t<std::uint8_t> >{app_name};
         this->send_control_msg(std::move(msg));
     }
 

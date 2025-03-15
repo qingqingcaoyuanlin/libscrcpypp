@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.25)
-project(scrcpy++ VERSION 1.7.10 LANGUAGES C CXX)
+project(scrcpy++ VERSION 1.7.10 LANGUAGES CXX)
 if (WIN32)
     add_compile_definitions(_WIN32_WINNT=0x0A00)
     add_compile_definitions(NOMINMAX)
@@ -18,12 +18,12 @@ pkg_check_modules(LIBAV REQUIRED
         libswscale
         libavutil
 )
-include_directories(${Boost_INCLUDE_DIRS})
 
 add_library(scrcpy++ STATIC src/client.cpp src/decoder.cpp src/frame.cpp src/control_msg.cpp)
 target_include_directories(scrcpy++ PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
         $<INSTALL_INTERFACE:include/scrcpy++>
+        ${Boost_INCLUDE_DIRS}
 )
 target_link_libraries(scrcpy++
         PUBLIC Boost::filesystem

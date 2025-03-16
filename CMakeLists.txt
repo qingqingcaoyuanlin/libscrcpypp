@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD 23)
 find_package(Boost 1.80.0 COMPONENTS filesystem system REQUIRED)
 find_package(PkgConfig REQUIRED)
 find_package(OpenCV 4.0 REQUIRED)
-pkg_check_modules(LIBAV REQUIRED
+pkg_check_modules(LIBAV REQUIRED IMPORTED_TARGET
         libavdevice
         libavfilter
         libavformat
@@ -28,7 +28,7 @@ target_include_directories(scrcpy++ PUBLIC
 target_link_libraries(scrcpy++
         PUBLIC Boost::filesystem
         PUBLIC Boost::system
-        PUBLIC ${LIBAV_LIBRARIES}
+        PUBLIC PkgConfig::LIBAV
         PUBLIC ${OpenCV_LIBS}
 )
 

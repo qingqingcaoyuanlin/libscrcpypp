@@ -1,6 +1,7 @@
 stages:
   - build
   - publish
+  - deploy
 
 build-linux-job:
   stage: build
@@ -46,3 +47,14 @@ publish-docker-job:
     - docker push enderthecoder/libscrcpypp
   tags:
     - linux
+
+deploy-windows-job:
+  stage: deploy
+  script:
+    - mkdir deploy-windows
+    - cd deploy-windows
+    - cmake ..
+    - cmake --build . --config Release
+    - cmake --install .
+  tags:
+    - windows

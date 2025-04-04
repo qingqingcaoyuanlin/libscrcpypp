@@ -21,6 +21,10 @@ namespace scrcpy {
             video_socket->cancel();
             video_socket->close();
         }
+        if (control_socket != nullptr and control_socket->is_open()) {
+            control_socket->cancel();
+            control_socket->close();
+        }
 
         if (server_c.running()) {
             server_c.terminate();
@@ -39,10 +43,15 @@ namespace scrcpy {
         tcp::resolver resolver(*io_context);
         const auto endpoints = resolver.resolve(addr, std::to_string(port));
 
-
+        if (this->video_socket != nullptr and video_socket->is_open()) {
+            video_socket->close();
+        }
         this->video_socket = std::make_shared<tcp::socket>(*io_context);
         boost::asio::connect(*this->video_socket, endpoints);
 
+        if (this->control_socket != nullptr and control_socket->is_open()) {
+            control_socket->close();
+        }
         this->control_socket = std::make_shared<tcp::socket>(*io_context);
         boost::asio::connect(*this->control_socket, endpoints);
 
@@ -105,7 +114,7 @@ namespace scrcpy {
                         av_packet_free(&this->config_packet);
                     }
                     std::cerr << "end of video stream" << std::endl;
-                    this->stop_recv();
+                    this->recv_enabled = false;
                     this->video_socket->close();
                     if (this->consumer.has_value()) {
                         this->consumer.value()(nullptr);
@@ -165,19 +174,26 @@ namespace scrcpy {
             std::cerr << "network thread exited." << std::endl;
         }
         recv_handle = std::thread([t = shared_from_this()] {
-            t->run_recv();
+            try {
+                t->run_recv();
+            } catch (std::exception &e) {
+                std::cerr << "recv stopped: " << e.what() << std::endl;
+            }
         });
     }
 
     auto client::stop_recv() -> void {
         this->recv_enabled = false;
+        if (this->recv_handle.joinable()) {
+            this->recv_handle.join();
+        }
     }
 
     auto client::is_recv_enabled() -> bool {
         return this->recv_enabled;
     }
 
-    auto client::set_frame_consumer(std::function<void(std::shared_ptr<frame>)> consumer) -> void {
+    auto client::set_frame_consumer(const std::function<void(std::shared_ptr<frame>)> &consumer) -> void {
         this->consumer = consumer;
     }
 
@@ -351,7 +367,9 @@ namespace scrcpy {
     }
 
     auto client::terminate() -> void {
-        this->server_c.terminate();
+        if (this->server_c.running()) {
+            this->server_c.terminate();
+        }
     }
 
     auto client::server_alive() -> bool {
@@ -408,7 +426,7 @@ namespace scrcpy {
     }
 
     auto client::slide(std::tuple<std::int32_t, std::int32_t> begin, std::tuple<std::int32_t, std::int32_t> end,
-                       const std::uint64_t pointer_id, std::chrono::milliseconds duration) -> void {
+                       const std::uint64_t pointer_id, std::chrono::milliseconds duration) const -> void {
         auto &[x0, y0] = begin;
         auto &[x1, y1] = end;
 

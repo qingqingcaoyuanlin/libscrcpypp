@@ -40,7 +40,7 @@ namespace scrcpy {
 
         auto is_recv_enabled() -> bool;
 
-        auto set_frame_consumer(std::function<void(std::shared_ptr<frame>)> consumer) -> void;
+        auto set_frame_consumer(const std::function<void(std::shared_ptr<frame>)>& consumer) -> void;
 
         auto frames() -> std::vector<std::shared_ptr<frame> >;
 
@@ -90,7 +90,7 @@ namespace scrcpy {
 
         auto slide(std::tuple<std::int32_t, std::int32_t> begin, std::tuple<std::int32_t, std::int32_t> end,
                    std::uint64_t pointer_id = pointer_id::GENERIC_FINGER,
-                   std::chrono::milliseconds duration = std::chrono::milliseconds(200)) -> void;
+                   std::chrono::milliseconds duration = std::chrono::milliseconds(200)) const -> void;
 
         auto click(std::int32_t x, std::int32_t y, std::uint64_t pointer_id = pointer_id::GENERIC_FINGER) const -> void;
 

@@ -485,6 +485,16 @@ namespace scrcpy {
         this->send_control_msg(std::move(msg));
     }
 
+    auto client::scroll(const float h_scroll, const float v_scroll) const -> void {
+        auto msg= std::make_unique<scroll_msg>();
+        msg->h_scroll = ifp16_t{h_scroll};
+        msg->v_scroll = ifp16_t{v_scroll};
+        msg->action_button = abs_enum_t<android_motionevent_buttons, std::uint32_t>{
+            android_motionevent_buttons::AMOTION_EVENT_BUTTON_PRIMARY
+        };
+        this->send_control_msg(std::move(msg));
+    }
+
     auto client::send_single_byte_control_msg(control_msg_type msg_type) const -> void {
         this->send_control_msg(std::make_unique<single_byte_msg>(msg_type));
     }

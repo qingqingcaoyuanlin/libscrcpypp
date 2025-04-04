@@ -397,7 +397,7 @@ namespace scrcpy {
         auto serialize() -> std::vector<std::byte> override;
 
         std::optional<abs_enum_t<control_msg_type> > msg_type = abs_enum_t{
-            control_msg_type::SC_CONTROL_MSG_TYPE_INJECT_TEXT
+            control_msg_type::SC_CONTROL_MSG_TYPE_INJECT_SCROLL_EVENT
         };
         std::optional<ifp16_t> h_scroll;
         std::optional<ifp16_t> v_scroll;

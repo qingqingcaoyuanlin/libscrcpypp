@@ -236,14 +236,32 @@ namespace scrcpy {
             : abs_int_t(float_to_u16fp(value)) {
         }
 
-        static uint16_t float_to_u16fp(const float f) {
+        static std::uint16_t float_to_u16fp(const float f) {
             if (not(f >= 0.0f && f <= 1.0f)) throw std::invalid_argument("invalid floating point value");
-            uint32_t u = f * 0x1p16f;
+            std::uint32_t u = f * 0x1p16f;
             if (u >= 0xffff) {
                 if (u != 0x10000) throw std::invalid_argument("float bit error");
                 u = 0xffff;
             }
             return static_cast<uint16_t>(u);
+        }
+    };
+
+    class ifp16_t final : public abs_int_t<std::int16_t> {
+    public:
+        explicit ifp16_t(const float value)
+            : abs_int_t(float_to_i16fp(value)) {
+        }
+
+        static std::int16_t float_to_i16fp(const float f) {
+            if (not(f >= -1.0f && f <= 1.0f)) throw std::invalid_argument("invalid floating point value");
+            std::int32_t i = f * 0x1p15f; // 2^15
+            if (i < -0x8000) throw std::invalid_argument("float_to_i16fp underflow");
+            if (i >= 0x7fff) {
+                if (i != 0x8000) throw std::invalid_argument("float_to_i16fp overflow"); // for f == 1.0f
+                i = 0x7fff;
+            }
+            return static_cast<std::int16_t>(i);
         }
     };
 
@@ -370,6 +388,20 @@ namespace scrcpy {
             control_msg_type::SC_CONTROL_MSG_TYPE_START_APP
         };
         std::optional<string_t<abs_int_t<std::uint8_t> > > app_name;
+    };
+
+    class scroll_msg final : public control_msg {
+    public:
+        [[nodiscard]] auto buf_size() const -> std::size_t override;
+
+        auto serialize() -> std::vector<std::byte> override;
+
+        std::optional<abs_enum_t<control_msg_type> > msg_type = abs_enum_t{
+            control_msg_type::SC_CONTROL_MSG_TYPE_INJECT_TEXT
+        };
+        std::optional<ifp16_t> h_scroll;
+        std::optional<ifp16_t> v_scroll;
+        std::optional<abs_enum_t<android_motionevent_buttons, std::uint32_t> > action_button;
     };
 }
 

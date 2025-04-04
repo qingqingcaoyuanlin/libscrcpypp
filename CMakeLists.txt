@@ -30,6 +30,7 @@ target_link_libraries(scrcpy++
         PUBLIC Boost::system
         PUBLIC PkgConfig::LIBAV
         PUBLIC ${OpenCV_LIBS}
+        PUBLIC $<$<PLATFORM_ID:Windows>:ws2_32>
 )
 
 add_executable(scrcpy++-video-test)

@@ -254,7 +254,7 @@ namespace scrcpy {
         }
 
         static std::int16_t float_to_i16fp(const float f) {
-            if (not(f >= -1.0f && f <= 1.0f)) throw std::invalid_argument("invalid floating point value");
+            if (f < -1.0f or f > 1.0f) throw std::invalid_argument("invalid floating point value");
             std::int32_t i = f * 0x1p15f; // 2^15
             if (i < -0x8000) throw std::invalid_argument("float_to_i16fp underflow");
             if (i >= 0x7fff) {
@@ -399,6 +399,7 @@ namespace scrcpy {
         std::optional<abs_enum_t<control_msg_type> > msg_type = abs_enum_t{
             control_msg_type::SC_CONTROL_MSG_TYPE_INJECT_SCROLL_EVENT
         };
+        std::optional<position_t> position;
         std::optional<ifp16_t> h_scroll;
         std::optional<ifp16_t> v_scroll;
         std::optional<abs_enum_t<android_motionevent_buttons, std::uint32_t> > action_button;

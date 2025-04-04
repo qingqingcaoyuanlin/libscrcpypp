@@ -92,12 +92,13 @@ namespace scrcpy {
     }
 
     auto scroll_msg::buf_size() const -> std::size_t {
-        return msg_type->size() + v_scroll->size() + h_scroll->size() + action_button->size();
+        return msg_type->size() + position->size() + v_scroll->size() + h_scroll->size() + action_button->size();
     }
 
     auto scroll_msg::serialize() -> std::vector<std::byte> {
         auto buf = this->init_buf();
         this->join_buf(msg_type->serialize());
+        this->join_buf(position->serialize());
         this->join_buf(h_scroll->serialize());
         this->join_buf(v_scroll->serialize());
         this->join_buf(action_button->serialize());

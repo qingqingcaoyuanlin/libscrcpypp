@@ -61,11 +61,12 @@ jobs:
 
       - name: Install dependencies
         run: |
-          # 安装 Boost (使用 vcpkg)
-          git clone https://github.com/microsoft/vcpkg.git
-          .\vcpkg\bootstrap-vcpkg.bat
-          .\vcpkg\vcpkg install boost-filesystem boost-system opencv4 ffmpeg --triplet x64-windows
-
+             mkdir -p build-windows
+             cd build-windows
+             # 修正 vcpkg 工具链文件路径（使用绝对路径）
+             cmake .. -DCMAKE_TOOLCHAIN_FILE="$env:GITHUB_WORKSPACE/vcpkg/scripts/buildsystems/vcpkg.cmake" -A x64
+             # 使用 Windows 兼容的并行构建参数
+             cmake --build . --config Release -j $env:NUMBER_OF_PROCESSORS
       - name: Build
         run: |
           mkdir -p build-windows

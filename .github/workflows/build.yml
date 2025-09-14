@@ -55,29 +55,29 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Set up Visual Studio environment
-        uses: microsoft/setup-msbuild@v2
-
+  
+      - name: Update CMake
+        uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version: '3.25.x'
+  
       - name: Install dependencies
         run: |
-             mkdir -p build-windows
-             cd build-windows
-             # 修正 vcpkg 工具链文件路径（使用绝对路径）
-             cmake .. -DCMAKE_TOOLCHAIN_FILE="$env:GITHUB_WORKSPACE/vcpkg/scripts/buildsystems/vcpkg.cmake" -A x64
-             # 使用 Windows 兼容的并行构建参数
-             cmake --build . --config Release -j $env:NUMBER_OF_PROCESSORS
+          git clone https://github.com/microsoft/vcpkg.git
+          .\vcpkg\bootstrap-vcpkg.bat
+          .\vcpkg\vcpkg install boost-filesystem[core]:x64-windows boost-system[core]:x64-windows opencv4:x64-windows ffmpeg:x64-windows --clean-after-build
+  
       - name: Build
         run: |
           mkdir -p build-windows
           cd build-windows
-          cmake .. -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake -A x64
-          cmake --build . --config Release -j$(nproc)
-
+          cmake .. -DCMAKE_TOOLCHAIN_FILE="$env:GITHUB_WORKSPACE/vcpkg/scripts/buildsystems/vcpkg.cmake" -A x64 -DBoost_USE_STATIC_LIBS=ON
+          cmake --build . --config Release -j $env:NUMBER_OF_PROCESSORS
+  
       - name: Package artifacts
         run: |
           Compress-Archive -Path build-windows/Release/scrcpy++.lib -DestinationPath libscrcpy++-windows-x64.zip
-
+  
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:

@@ -1,0 +1,84 @@
+# .github/workflows/build.yml
+name: libscrcpy++ Cloud Build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            cmake \
+            libboost-filesystem-dev \
+            libboost-system-dev \
+            libopencv-dev \
+            libavdevice-dev \
+            libavfilter-dev \
+            libavformat-dev \
+            libavcodec-dev \
+            libswresample-dev \
+            libswscale-dev \
+            libavutil-dev
+
+      - name: Build
+        run: |
+          mkdir -p build-linux
+          cd -C build-linux
+          cmake ..
+          cmake --build . --config Release -j$(nproc)
+
+      - name: Package artifacts
+        run: |
+          cd build-linux
+          tar -czf libscrcpy++-linux-x64.tar.gz Release/libscrcpy++.a
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: libscrcpy++-linux-x64
+          path: build-linux/libscrcpy++-linux-x64.tar.gz
+
+  build-windows:
+    runs-on: windows-2022
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Visual Studio environment
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Install dependencies
+        run: |
+          # 安装 Boost (使用 vcpkg)
+          git clone https://github.com/microsoft/vcpkg.git
+          .\vcpkg\bootstrap-vcpkg.bat
+          .\vcpkg\vcpkg install boost-filesystem boost-system opencv4 ffmpeg --triplet x64-windows
+
+      - name: Build
+        run: |
+          mkdir -p build-windows
+          cd build-windows
+          cmake .. -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake -A x64
+          cmake --build . --config Release -j$(nproc)
+
+      - name: Package artifacts
+        run: |
+          Compress-Archive -Path build-windows/Release/scrcpy++.lib -DestinationPath libscrcpy++-windows-x64.zip
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: libscrcpy++-windows-x64
+          path: libscrcpy++-windows-x64.zip

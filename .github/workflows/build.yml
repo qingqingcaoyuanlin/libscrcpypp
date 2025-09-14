@@ -35,7 +35,7 @@ jobs:
       - name: Build
         run: |
           mkdir -p build-linux
-          cd -C build-linux
+          cd  build-linux
           cmake ..
           cmake --build . --config Release -j$(nproc)
 

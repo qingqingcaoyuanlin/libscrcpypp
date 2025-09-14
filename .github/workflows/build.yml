@@ -69,6 +69,8 @@ jobs:
   
       - name: Build
         run: |
+          vcpkg install boost-asio boost-filesystem boost-system opencv4 ffmpeg --triplet x64-windows-static
+
           mkdir -p build-windows
           cd build-windows
           cmake .. -DCMAKE_TOOLCHAIN_FILE="$env:GITHUB_WORKSPACE/vcpkg/scripts/buildsystems/vcpkg.cmake" -A x64 -DBoost_USE_STATIC_LIBS=ON
